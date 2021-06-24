@@ -12,11 +12,11 @@ const Incident = sequelize.define('incidents', {
         allowNull:false
     },
     phone: {
-        type:DataTypes.STRING,
+        type:DataTypes.STRING(14),
         allowNull: true
     },
     user_id: {   
-        type:DataTypes.STRING
+        type:DataTypes.INTEGER
     },
     stage_id: {
         type:DataTypes.INTEGER,
@@ -27,7 +27,7 @@ const Incident = sequelize.define('incidents', {
         allowNull:true
     },
     ticket: {
-        type:DataTypes.STRING,
+        type:DataTypes.STRING(20),
         allowNull:true
     },
     resolve_date: {
@@ -41,7 +41,7 @@ const Incident = sequelize.define('incidents', {
         type:DataTypes.STRING
     },
     category_id: {
-        type:DataTypes.STRING
+        type:DataTypes.INTEGER(2)
     },
     ticket_time: {
         type:DataTypes.DATE
