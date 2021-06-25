@@ -3,7 +3,7 @@ const sequelize = require('../configs/connection');
 
 const Category = sequelize.define('categories', {
     id: {
-        types: DataTypes.INTEGER(11),
+        type: DataTypes.INTEGER(11),
         primaryKey: true,
         autoIncrement: true,
         allowNull: false

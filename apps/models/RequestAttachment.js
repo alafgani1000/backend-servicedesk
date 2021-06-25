@@ -20,3 +20,5 @@ const RequestAttachment = sequelize.define('request_attachments', {
         allowNull: false
     }
 });
+
+module.exports = RequestAttachment;

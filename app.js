@@ -12,6 +12,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cors());
 const port = process.env.PORT || 4001;
+
+
 const index =  require('./routes/index');
 const user = require('./routes/user');
 const auth = require('./routes/auth');
@@ -20,10 +22,7 @@ const team = require('./routes/team');
 const category = require('./routes/category');
 const stage = require('./routes/stage');
 const incident = require('./routes/incident')
-const { Sequelize, DataTypes } = require('sequelize');
-const Team = require('./apps/models/Team');
-const Incident = require('./apps/models/Incident');
-const IncidentAattachments = require('./apps/models/IncidentAttachments');
+
 
 app.use(index);
 app.use('/api/user',user);
@@ -33,9 +32,7 @@ app.use('/api/team',team);
 app.use('/api/category',category);
 app.use('/api/stage',stage);
 app.use('/api/incident',incident);
-Team.sync();
-Incident.sync();
-IncidentAattachments.sync();
+
 
 let interval;
 io.on('connection', (socket) => {

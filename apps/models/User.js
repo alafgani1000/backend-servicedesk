@@ -33,7 +33,8 @@ const User = sequelize.define('users', {
         allowNull: false
     },
     status: {
-        type
+        type: DataTypes.INTEGER(11),
+        allowNull: true
     },
     token: {
         type: DataTypes.STRING(255)
