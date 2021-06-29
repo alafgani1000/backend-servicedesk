@@ -1,6 +1,7 @@
 const db = require('../configs/database');
 const { validationResult } = require('express-validator');
 const moment = require('moment');
+const { v4:uuidv4 } =  require('uuid');
 
 exports.getTeams = (req, res) => {
     try{
@@ -102,8 +103,8 @@ exports.storeTeam = (req, res) => {
         db.connect((err) => {
             let post = {
                 name:name,
-                created_at:createdAt,
-                updated_at:updatedAt,
+                createdAt:createdAt,
+                updatedAt:updatedAt,
             };
             let storeQuery = 'INSERT INTO teams SET ?'
             db.query(storeQuery, post, (error, result, fields) => {
@@ -148,7 +149,7 @@ exports.updateTeam = (req, res) => {
         let name = req.body.name;
         let updatedAt = moment().format('YYYY-MM-DD HH:mm:ss');
         db.connect((err) => {
-            let updateQuery = 'UPDATE teams SET name = ?, updated_at = ? WHERE id = ?';
+            let updateQuery = 'UPDATE teams SET name = ?, updatedAt = ? WHERE id = ?';
             db.query(updateQuery, [name,updatedAt,idTeam], (error, result, fields) => {
                 if(error){
                     res.json({

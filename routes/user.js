@@ -13,7 +13,8 @@ router.get('/admin/all',
     auth.isAuth, 
     auth.hashRole(AuthHelp.role('admin')), 
     UserController.getUsers);
-router.patch('/:id/update',[ 
+
+router.put('/:id/update',[ 
         check('name').notEmpty(),
         check('email').isEmail().normalizeEmail(),
         check('level').notEmpty(),
@@ -22,6 +23,7 @@ router.patch('/:id/update',[
     auth.isAuth, 
     auth.hashRole(AuthHelp.role('admin')),
     UserController.updateUserForAdmin);
+
 router.delete('/:id/delete', 
     auth.isAuth, 
     auth.hashRole(AuthHelp.role('admin')),

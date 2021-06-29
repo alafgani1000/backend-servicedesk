@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const db = require('../configs/database');
 const { validationResult } = require('express-validator');
+const moment = require('moment');
 
 exports.getUser = (req, res) => {
     let userId = req.params.id;
@@ -43,6 +44,9 @@ exports.storeUser = (req, res) => {
     let email = req.body.email;
     let level = req.body.level;
     let group = req.body.group; 
+    let password = bcrypt.hashSync(req.body.password,10);
+    let createdAt = moment().format('YYYY-MM-DD HH:mm:ss');
+    let updatedAt = moment().format('YYYY-MM-DD HH:mm:ss');
     let status = 'nothing';
     let post = { 
         username:userName, 
@@ -50,7 +54,9 @@ exports.storeUser = (req, res) => {
         password:password, 
         email:email, 
         level:level, 
-        groupuser:group 
+        groupuser:group,
+        createdAt:createdAt,
+        updatedAt:updatedAt 
     };
     db.query('INSERT INTO users SET ?',post,function(error, result, fields){
         if(error){

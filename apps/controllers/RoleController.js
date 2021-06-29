@@ -86,8 +86,8 @@ exports.storeUserGroup = (req, res) => {
     let updatedAt = new Date();
     let post = {
         role:role,
-        created_at:createdAt,
-        updated_at:updatedAt
+        createdAt:createdAt,
+        updatedAt:updatedAt
     };
     db.connect((err) => {
         let storeUserGroupQuery = 'INSERT INTO roles SET ?';
@@ -143,7 +143,7 @@ exports.updateUserGroup = (req, res) => {
     let role = req.body.role;
     let updatedAt = moment().format('YYYY-MM-DD HH:mm:ss');
     db.connect((err) => {
-        let queryUpdate = 'UPDATE roles SET role = ?, updated_at = ? WHERE id = ?'
+        let queryUpdate = 'UPDATE roles SET role = ?, updatedAt = ? WHERE id = ?'
         db.query(queryUpdate,[role,updatedAt,userGroupId],(error,result,fields) => {
             if(error){
                 res.json({

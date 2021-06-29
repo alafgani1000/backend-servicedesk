@@ -1,13 +1,15 @@
 const Role = require('../models/Role');
 
-exports.role = () => {
+let role = () => {
     Role.create({
         role: 'admin'
     })
     .catch(err => {
         res.status(500).send({
         message:
-            err.message || "Error someting error"
+            err.message || "Error someting"
         });
     });    
 } 
+
+role();

@@ -3,24 +3,15 @@ const sequelize = require('../configs/connection');
 
 const Team = sequelize.define('teams', {
     id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.INTEGER,
         allowNull: false,
-        primaryKey: true
+        primaryKey: true,
+        autoIncrement: true
     },
     name: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    created_at: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    updated_at: {
-        type: DataTypes.DATE,
-        allowNull: false
     }
-}, {
-    timestamps: false
-})
+});
 
 module.exports = Team;
