@@ -1,10 +1,15 @@
 const { Sequelize } = require('sequelize');
 const multer = require('multer');
 const fs = require('fs');
-const db = require('../configs/database');
 const sequelize = require('../configs/connection');
-const upload = require('../middlewares/upload');
-const Incident = require('../models/Incident');
+const moment = require('moment');
+const { v4:uuidv4 } =  require('uuid');
+const db = require('../configs/database');
+
+const dbconfig = require('../configs/db.config');
+const Incident = dbconfig.incident;
+const IncidentAttachmens = dbconfig.incidentAttachments;
+
 
 require('dotenv').config();
 
@@ -12,49 +17,31 @@ exports.viewIncidents = (req, res) => {
     const title = req.query.title;
     var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
 
-
     Incident.findAll({ where: condition })
         .then(data => {
-            res.send(data);
+            res.json({
+                'message':'Success',
+                'data':data
+            });
         })
         .catch(err => {
             res.status(500).send({
             message:
-                err.message || "Error someting error"
+                err.message || "Error someting"
             });
         });
 }
 
 exports.viewIncident = (req, res) => {
     try{
-        let idTeam = req.params.id;
-        db.connect((err) => {
-            let selectQuery = 'SELECT * FROM incidents WHERE id = ?'
-            db.query(selectQuery, [idTeam], (error, result, fields) => {
-                if(error){
-                    res.json({
-                        'message':'Error',
-                        'data':result,
-                        'error':error
-                    });
-                    res.end();
-                }else{
-                    if(result.length > 0){
-                        res.json({
-                            'message':'Success',
-                            'data':result,
-                            'error':error
-                        });
-                        res.end();
-                    }else{
-                        res.json({
-                            'message':'Data not found',
-                            'data':result,
-                            'error':error
-                        }); 
-                        res.end();
-                    }
-                }
+        Incident.findAll({ where: condition })
+        .then(data => {
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+            message:
+                err.message || "Error someting"
             });
         });
     }catch(err){
@@ -67,58 +54,51 @@ exports.viewIncident = (req, res) => {
     }
 }
 
-exports.storeIncident = async (req, res) => {
-    try {
-        await upload(req, res);
-
-        if(req.file == undefined) {
-            return res.status(400).send({ message: "Choose a file to upload" });
-        }
-        
+exports.createIncident = (req, res) => {
+    try {        
         let text = req.body.text;
         let location = req.body.location;
         let phone = req.body.phone;
-        let user_id = '';
+        let user_id = req.body.user;
         let stage_id = req.body.stage_id;
-        let ticket = req.body.ticket;
         let createdAt = moment().format('YYYY-MM-DD HH:mm:ss');
         let updatedAt = moment().format('YYYY-MM-DD HH:mm:ss');
-        db.connect((err) => {
-            let post = {
-                text:text,
-                location:location,
-                phone:phone,
-                user_id:user_id,
-                stage_id:stage_id,
-                ticket:ticket,
-                created_at:createdAt,
-                updated_at:updatedAt,
-            };
-            let storeQuery = 'INSERT INTO incidents SET ?'
-            db.query(storeQuery, post, (error, result, fields) => {
-                if(error){
-                    res.json({
-                        'message':'Error',
-                        'data':result,
-                        'error':error
-                    });
-                    res.end();
-                }else{
-                   let insertStatus = true;
-                }
+        let insertStatus = false;
+        
+        let files = req.files;
+        let fileUploads = [];
+        files.forEach(element => {
+            fileUploads.push({
+                'filename': element.filename,
+                'filelocation':'upload',
+                'alias':element.originalname,
+                'createdAt':createdAt,
+                'updatedAt':updatedAt
             });
         });
-        if(insertStatus == tue){
-            res.json({
-                'message':'Success',
-            });
+        
+        Incident.create({
+            id:uuidv4(),
+            text:text,
+            location:location,
+            phone:phone,
+            user:user_id,
+            stage_id:stage_id,
+            createdAt:createdAt,
+            updatedAt:updatedAt,
+            incidentAttachment: fileUploads
+        })
+        .then(data => {
+            res.send(req.files);
             res.end();
-        }else{
-            res.status(200).json({
-                message: "File uploaded successfully: " + req.file.originalname,
+        })
+        .catch(err => {
+            res.status(500).send({
+            message:
+                err.message || "Error someting"
             });
-        }
-      
+        });    
+
     } catch(err) {
         console.log(err);
 

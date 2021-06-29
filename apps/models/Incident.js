@@ -4,16 +4,20 @@ const sequelize = require('../configs/connection');
 const Incident = sequelize.define('incidents', {
     id: {
         type: DataTypes.STRING,
-        allowNull: false,
-        primaryKey: true
+        allowNull:false,
+        primaryKey:true
     },
     text: {
         type:DataTypes.TEXT,
         allowNull:false
     },
+    location: {
+        type:DataTypes.STRING(100),
+        allowNull:true
+    },
     phone: {
         type:DataTypes.STRING(14),
-        allowNull: true
+        allowNull:true
     },
     user_id: {   
         type:DataTypes.INTEGER
