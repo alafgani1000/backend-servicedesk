@@ -104,8 +104,8 @@ exports.storeStage = (req, res) => {
             let post = {
                 text:text,
                 description:description,
-                created_at:createdAt,
-                updated_at:updatedAt,
+                createdAt:createdAt,
+                updatedAt:updatedAt,
             };
             let storeQuery = 'INSERT INTO stages SET ?'
             db.query(storeQuery, post, (error, result, fields) => {
@@ -151,7 +151,7 @@ exports.updateStage = (req, res) => {
         let description = req.body.description;
         let updatedAt = moment().format('YYYY-MM-DD HH:mm:ss');
         db.connect((err) => {
-            let updateQuery = 'UPDATE stages SET text = ?, description = ?, updated_at = ? WHERE id = ?';
+            let updateQuery = 'UPDATE stages SET text = ?, description = ?, updatedAt = ? WHERE id = ?';
             db.query(updateQuery, [text,description,updatedAt,stageId], (error, result, fields) => {
                 if(error){
                     res.json({
