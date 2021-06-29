@@ -20,7 +20,7 @@ const Incident = sequelize.define('incidents', {
     },
     stage_id: {
         type:DataTypes.INTEGER,
-        allowNull:false
+        allowNull:true
     },
     resolve_text: {
         type:DataTypes.STRING,
@@ -34,8 +34,8 @@ const Incident = sequelize.define('incidents', {
         type:DataTypes.DATE
     },
     team_id: {
-        type:DataTypes.STRING,
-        allowNull:false
+        type:DataTypes.INTEGER,
+        allowNull:true
     },
     user_technician: {
         type:DataTypes.STRING
