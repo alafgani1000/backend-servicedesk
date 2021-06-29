@@ -104,8 +104,8 @@ exports.storeCategory = (req, res) => {
             let post = {
                 name:name,
                 time_interval:interval,
-                created_at:createdAt,
-                updated_at:updatedAt,
+                createdAt:createdAt,
+                updatedAt:updatedAt,
             };
             let storeQuery = 'INSERT INTO categories SET ?'
             db.query(storeQuery, post, (error, result, fields) => {
@@ -151,7 +151,7 @@ exports.updateCategory = (req, res) => {
         let interval = req.body.interval;
         let updatedAt = moment().format('YYYY-MM-DD HH:mm:ss');
         db.connect((err) => {
-            let updateQuery = 'UPDATE categories SET name = ?, time_interval = ?, updated_at = ? WHERE id = ?';
+            let updateQuery = 'UPDATE categories SET name = ?, time_interval = ?, updatedAt = ? WHERE id = ?';
             db.query(updateQuery, [name,interval,updatedAt,idCat], (error, result, fields) => {
                 if(error){
                     res.json({
@@ -184,7 +184,7 @@ exports.deleteCategory = (req, res) => {
     let catId = req.params.id;
     try{
         db.connect((err) => {
-            let deleteQuery = 'DELETE FROM category WHERE id = ?';
+            let deleteQuery = 'DELETE FROM categories WHERE id = ?';
             db.query(deleteQuery, [catId], (error, result, fields) => {
                 if(error){
                     res.json({
