@@ -9,6 +9,8 @@ const db = require('../configs/database');
 const dbconfig = require('../configs/db.config');
 const Incidents = dbconfig.incidents;
 const IncidentAttachments = dbconfig.incidentAttachments;
+const Teams = dbconfig.teams;
+const Categories = dbconfig.categories;
 
 
 require('dotenv').config();
@@ -55,7 +57,19 @@ exports.viewIncident = (req, res) => {
 }
 
 exports.createIncident = (req, res) => {
-    try {        
+    try {       
+        /*-- validation --*/
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ 
+                'message':'Error',
+                'send':req.body,
+                'data':[],
+                'errors': errors.array(), 
+            });
+        }
+        /*-- end validation --*/
+        
         let text = req.body.text;
         let location = req.body.location;
         let phone = req.body.phone;
@@ -119,15 +133,96 @@ exports.createIncident = (req, res) => {
     }
 }
 
+exports.updateIncident = (req, res) => {
+
+}
+
 exports.inputTikcet = (req, res) => {
     try {
+        /*-- validation --*/
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ 
+                'message':'Error',
+                'send':req.body,
+                'data':[],
+                'errors': errors.array(), 
+            });
+        }
+        /*-- end validation --*/
+         
+        // initiate variable
         let incidentId = req.param.id;
         let teamId = req.body.team_id;
         let ticket = req.body.ticket;
         let categoryId = req.body.category_id;
+        let stageId = req.body.stage_id;
+        let validation = [];
+        // create measage validation
+        const validasi_team = { team: 'Team tidak ditemukan' };
+        const validasi_category = { category: 'Kategori tidak ditemukan' };
+        // get data team valid in database
+        let team = Teams.findOne({ where: { id:teamId } });
+        let category = Categories.findOne({ where: { id:categoryId } });
+        // validation data
+        if(team === null){
+            validation.push(validasi_team);
+        }
+        if(category === null){
+            validation.push(validasi_category);
+        }
+
+        if(validation.length > 0){
+            res.status(404).json({
+                "error":validation
+            })
+        }else{
+            let dateNow = moment().format("YYYY-MM-DD HH:mm:ss");
+            let ticketTime = dateNow.add(Category.time_interval, 'hours');
+
+            Incident.update({
+                team_id: teamId,
+                ticket: ticket,
+                category_id: categoryId,
+                ticket_time: ticketTime,
+                stage_id: stageId
+            }, {
+                where: {
+                    id:incidentId
+                }
+            })
+            .then(data => {
+                res.status(200).json({
+                    "message":"Success"
+                });
+                res.end();
+            })
+            .catch(err => {
+                res.status(500).json({
+                    message: `Error occured: ${err}`,
+                });
+            });
+        }
+        
+    } catch(err) {
+        res.status(500).json({
+            message: `Error occured: ${err}`,
+        });
+    }
+}
+
+exports.resolve = (req, res) => {
+    try {
+        // initiate variable
+        let incidentId = req.param.id;
+        let resolveText = req.body.reslove_text;
+        let resolveDate = req.body.resolve_date;
+        let teknisi = req.body.teknisi;
+        // update data
         Incident.update({
-            team_id: teamId,
-            ticket: ticket
+           reslove_text:resolveText,
+           resolve_date:resolveDate,
+           user_technician:teknisi
         }, {
             where: {
                 id:incidentId
@@ -135,7 +230,7 @@ exports.inputTikcet = (req, res) => {
         })
         .then(data => {
             res.status(200).json({
-                "message":"Success"
+                "message":"Resolved"
             });
             res.end();
         })
