@@ -11,6 +11,6 @@ var upload = multer({ storage: storage })
 
 router.get('/', auth.isAuth, auth.hashRole(AuthHelp.role('admin')), incidentControllers.viewIncidents);
 router.get('/:id', auth.isAuth, auth.isAuth, auth.hashRole(AuthHelp.role('admin')), incidentControllers.viewIncident);
-router.post('/store', auth.isAuth, upload.array('file'), incidentControllers.createIncident);
+router.post('/create', auth.isAuth, upload.array('file'), incidentControllers.createIncident);
 
 module.exports = router;

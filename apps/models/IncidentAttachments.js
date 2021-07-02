@@ -5,7 +5,8 @@ const IncidentAattachments = sequelize.define('incident_attachments', {
     id: {
         type: DataTypes.BIGINT,
         allowNull: false,
-        primaryKey: true
+        primaryKey: true,
+        autoIncrement:true
     },
     filename: {
         type:DataTypes.TEXT,
@@ -19,7 +20,7 @@ const IncidentAattachments = sequelize.define('incident_attachments', {
         type:DataTypes.STRING,
         allowNull:  false
     },
-    incident_id: {
+    incidentId: {
         type:DataTypes.STRING,
         allowNull:false
     }
