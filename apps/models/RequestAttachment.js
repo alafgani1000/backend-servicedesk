@@ -15,7 +15,7 @@ const RequestAttachment = sequelize.define('request_attachments', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    request_id: {
+    requestId: {
         type: DataTypes.STRING,
         allowNull: false
     }

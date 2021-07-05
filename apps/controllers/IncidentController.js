@@ -7,14 +7,22 @@ const { v4:uuidv4 } =  require('uuid');
 const db = require('../configs/database');
 
 const dbconfig = require('../configs/db.config');
+const { request } = require('http');
+const IncidentAattachments = require('../models/IncidentAttachments');
+const Incident = require('../models/Incident');
 const Incidents = dbconfig.incidents;
 const IncidentAttachments = dbconfig.incidentAttachments;
 const Teams = dbconfig.teams;
 const Categories = dbconfig.categories;
 
-
 require('dotenv').config();
 
+
+/**
+ * menampilkan incident
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.viewIncidents = (req, res) => {
     const title = req.query.title;
     var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
@@ -34,6 +42,11 @@ exports.viewIncidents = (req, res) => {
         });
 }
 
+/**
+ * menampilkan incident per id
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.viewIncident = (req, res) => {
     try{
         Incidents.findAll({ where: condition })
@@ -56,6 +69,12 @@ exports.viewIncident = (req, res) => {
     }
 }
 
+/**
+ * input incident
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.createIncident = (req, res) => {
     try {       
         /*-- validation --*/
@@ -70,6 +89,7 @@ exports.createIncident = (req, res) => {
         }
         /*-- end validation --*/
         
+        // inisiasi variabel
         let text = req.body.text;
         let location = req.body.location;
         let phone = req.body.phone;
@@ -79,6 +99,7 @@ exports.createIncident = (req, res) => {
         let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
         let insertStatus = false;
         
+        // get data file uploads
         let files = req.files;
         let fileUploads = [];
         files.forEach(element => {
@@ -90,14 +111,16 @@ exports.createIncident = (req, res) => {
                 updatedAt:updatedAt
             });
         });
-        let idIndicent = uuidv4();
+        // unique id with uuid
+        let idIndicent = uuidv4(); 
+        // insert data
         Incidents.create({
             id:idIndicent,
             text:text,
             location:location,
             phone:phone,
-            user:user_id,
-            stage_id:stage_id,
+            userId:user_id,
+            stageId:stage_id,
             createdAt:createdAt,
             updatedAt:updatedAt,
             incidentAttachments: fileUploads
@@ -110,10 +133,12 @@ exports.createIncident = (req, res) => {
             ]
         })
         .then(data => {
+            // if data inserted
             res.json({"message":"Success"});
             res.end();
         })
         .catch(err => {
+            // if error
             res.status(500).send({
             message:
                 err.message || "Error someting"
@@ -121,6 +146,7 @@ exports.createIncident = (req, res) => {
         });    
 
     } catch(err) {
+        // if error
         if(err.code == "LIMIT_FILE_SIZE"){
             return res.status(500).json({
                 message: "File size should be les than 5MB",
@@ -133,8 +159,49 @@ exports.createIncident = (req, res) => {
     }
 }
 
+/**
+ * update data incident
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.updateIncident = (req, res) => {
-
+    // inisiasi variabel
+    const incidentId = req.params.id;
+    let text = req.body.text;
+    let location = req.body.location;
+    let phone = req.body.phone;
+    let user_id = req.body.user;
+    let stage_id = req.body.stage_id;
+    let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+    try{
+        // update incident
+        Incident.update({
+            text:text,
+            location:location,
+            phone:phone,
+            userId:user_id,
+            stageId:stage_id,
+            updatedAt:updatedAt
+        }, {
+            where: {
+                id:incidentId
+            }
+        })
+        .then(data => {
+            res.status(200).json({
+                "message":"Updated"
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                message:`Error occured: ${err}`
+            })
+        })
+    } catch(err) {
+        res.status(500).json({
+            message: `Error occured: ${err}`
+        });
+    }
 }
 
 exports.inputTikcet = (req, res) => {
@@ -158,12 +225,14 @@ exports.inputTikcet = (req, res) => {
         let categoryId = req.body.category_id;
         let stageId = req.body.stage_id;
         let validation = [];
+
         // create measage validation
         const validasi_team = { team: 'Team tidak ditemukan' };
         const validasi_category = { category: 'Kategori tidak ditemukan' };
         // get data team valid in database
         let team = Teams.findOne({ where: { id:teamId } });
         let category = Categories.findOne({ where: { id:categoryId } });
+
         // validation data
         if(team === null){
             validation.push(validasi_team);
@@ -181,11 +250,11 @@ exports.inputTikcet = (req, res) => {
             let ticketTime = dateNow.add(Category.time_interval, 'hours');
 
             Incident.update({
-                team_id: teamId,
+                teamId: teamId,
                 ticket: ticket,
-                category_id: categoryId,
+                categoryId: categoryId,
                 ticket_time: ticketTime,
-                stage_id: stageId
+                stageId: stageId
             }, {
                 where: {
                     id:incidentId
@@ -218,11 +287,13 @@ exports.resolve = (req, res) => {
         let resolveText = req.body.reslove_text;
         let resolveDate = req.body.resolve_date;
         let teknisi = req.body.teknisi;
+        let stageId = req.body.stage_id;
         // update data
         Incident.update({
            reslove_text:resolveText,
            resolve_date:resolveDate,
-           user_technician:teknisi
+           user_technician:teknisi,
+           stageId:stageId
         }, {
             where: {
                 id:incidentId
@@ -242,6 +313,63 @@ exports.resolve = (req, res) => {
     } catch(err) {
         res.status(500).json({
             message: `Error occured: ${err}`,
+        });
+    }
+}
+
+exports.updateAttachment = (req, res) => {
+    try {
+        const attachmentId = request.params.id;
+        const fileName = req.files.filename;
+        const fileLocation = req.files.destination
+        const alias = req.files.originalname;
+        IncidentAattachments.update({
+            filename:fileName,
+            filelocation:fileLocation,
+            alias:alias
+        }, {
+            where: {
+                id:attachmentId
+            }
+        })
+        .then(data => {
+            res.status(200).json({
+                "message":"Updated"
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                "message":`Error occured: ${err}`
+            });
+        })
+    } catch(err) {
+        res.status(500).json({
+            message: `Error occured: ${err}`
+        });
+    }
+}
+
+exports.deleteAttachment = (req, res) => {
+    const attachmentId = req.params.id;
+    try {
+        IncidentAttachments.destroy({
+            where: {
+                id:attachmentId
+            }
+        })
+        .then(data => {
+            res.status(200).json({
+                "message":"Deleted"
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: `Error occured: ${err}`
+            });
+        })
+    } catch(err) {
+        res.status(500).json({
+            message: `Error  occured: ${error}`
         });
     }
 }

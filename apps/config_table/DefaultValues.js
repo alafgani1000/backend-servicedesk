@@ -1,6 +1,7 @@
 const Role = require('../models/Role');
 const Category = require('../models/Category');
 const Team = require('../models/Team');
+const Stage = require('../models/Stage');
 
 let role = () => {
     Role.create(
@@ -57,6 +58,27 @@ let category = () => {
     });
 }
 
+let stage = () => {
+    Stage.create({
+        text: 'New',
+        description: "New Incident"
+    });
+
+    Stage.create({
+        text: 'Open',
+        description: 'Incident sedang dikerjakan'
+    });
+
+    Stage.create({
+        text: 'Close',
+        description: 'Incident selesai ditangani'
+    });
+
+    Stage.create({
+        text: 'Archive',
+        description: 'Incident diarsipkan'
+    });
+}
 
 role();
 category();
