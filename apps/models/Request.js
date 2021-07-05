@@ -19,7 +19,7 @@ const Request = sequelize.define('requests', {
         type: DataTypes.TEXT,
         allowNull: false
     },
-    user_id: {
+    userId: {
         type: DataTypes.INTEGER(11),
         allowNull: false
     },
@@ -31,7 +31,7 @@ const Request = sequelize.define('requests', {
         type: DataTypes.STRING(255),
         allowNull: false
     },
-    stage_id: {
+    stageId: {
         type: DataTypes.INTEGER(11),
         allowNull: true
     },

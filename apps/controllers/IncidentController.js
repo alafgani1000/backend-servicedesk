@@ -8,8 +8,6 @@ const db = require('../configs/database');
 
 const dbconfig = require('../configs/db.config');
 const { request } = require('http');
-const IncidentAattachments = require('../models/IncidentAttachments');
-const Incident = require('../models/Incident');
 const Incidents = dbconfig.incidents;
 const IncidentAttachments = dbconfig.incidentAttachments;
 const Teams = dbconfig.teams;

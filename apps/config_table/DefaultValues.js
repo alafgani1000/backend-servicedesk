@@ -80,6 +80,7 @@ let stage = () => {
     });
 }
 
+stage();
 role();
 category();
 team();
