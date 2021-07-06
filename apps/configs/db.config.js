@@ -26,7 +26,7 @@ db.incidentAttachments.belongsTo(db.incidents, {
   as: "incidents"
 });
 db.requests.hasMany(db.requestAttachments, { as: "requestAttachments" });
-db.requestAttachments.belongsTo(db.sequelize, {
+db.requestAttachments.belongsTo(db.requests, {
   foreignKey: "requestId",
   as: "request"
 });
