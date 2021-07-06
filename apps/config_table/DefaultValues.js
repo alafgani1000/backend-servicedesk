@@ -70,6 +70,11 @@ let stage = () => {
     });
 
     Stage.create({
+        text: 'Resolve',
+        description: 'Incident selesai dikerjakan'
+    })
+
+    Stage.create({
         text: 'Close',
         description: 'Incident selesai ditangani'
     });
