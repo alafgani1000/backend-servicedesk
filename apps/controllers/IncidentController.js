@@ -202,6 +202,12 @@ exports.updateIncident = (req, res) => {
     }
 }
 
+/**
+ * input ticket
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.inputTikcet = (req, res) => {
     try {
         /*-- validation --*/
@@ -278,10 +284,15 @@ exports.inputTikcet = (req, res) => {
     }
 }
 
+/**
+ * resolve incident apabila sudah selesai dikerjakan
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.resolve = (req, res) => {
     try {
         // initiate variable
-        let incidentId = req.param.id;
+        let incidentId = req.params.id;
         let resolveText = req.body.reslove_text;
         let resolveDate = req.body.resolve_date;
         let teknisi = req.body.teknisi;
@@ -315,6 +326,48 @@ exports.resolve = (req, res) => {
     }
 }
 
+/**
+ * menutup incident
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.close = (req, res) => {
+    try {
+        // initiate variable
+        let incidentId = req.params.id;
+        let stageId = req.body.stage_id;
+        // update data
+        Incident.update({
+           stageId:stageId
+        }, {
+            where: {
+                id:incidentId
+            }
+        })
+        .then(data => {
+            res.status(200).json({
+                "message":"Resolved"
+            });
+            res.end();
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: `Error occured: ${err}`,
+            });
+        });
+    } catch(err) {
+        res.status(500).json({
+            message: `Error occured: ${err}`,
+        });
+    }
+}
+
+
+/**
+ * update attachment
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.updateAttachment = (req, res) => {
     try {
         const attachmentId = request.params.id;
@@ -347,6 +400,11 @@ exports.updateAttachment = (req, res) => {
     }
 }
 
+/**
+ * delete attachment
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.deleteAttachment = (req, res) => {
     const attachmentId = req.params.id;
     try {
