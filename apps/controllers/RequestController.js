@@ -74,7 +74,7 @@ exports.create = (res, req) => {
     } catch(err) {
         res.status(500).json({
             message:`Error ocurred: ${err}`
-        })
+        });
     }
 }
 
@@ -103,7 +103,7 @@ exports.updateAttachment = (req, res) => {
             res.status(500).json({
                 "message":`Error occured: ${err}`
             });
-        })
+        });
     } catch(err) {
         res.status(500).json({
             message: `Error occured: ${err}`
@@ -170,17 +170,17 @@ exports.startProject = (req, res) => {
         .then(data => {
             res.status(200).json({
                 message: "Success"
-            })
+            });
         })
         .catch(err => {
             res.json({
                 message: `Error something ${err}`
-            })
-        })
+            });
+        });
     } catch(err) {
         res.status(500).json({
             message:`Error occured ${err}`
-        })
+        });
     }    
 }
 
@@ -199,16 +199,16 @@ exports.resolveRequest = (req, res) => {
         .then(data => {
             res.status(200).json({
                 message:`Success`
-            })
+            });
         })
         .catch(err => {
             res.json({
                 message:`Error something ${err}`
-            })
-        })
+            });
+        });
     } catch(err) {
         res.json({
             message: `Error ocurred ${err}`
-        })
+        });
     }
 }
