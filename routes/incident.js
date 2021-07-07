@@ -6,24 +6,19 @@ const AuthHelp = require('../apps/helpers/AuthHelper');
 const { check } = require('express-validator');
 const multer = require('multer');
 const storage = require('../apps/middlewares/upload');
+const upload = multer({ storage:storage });
 
-var upload = multer({ storage: storage })
-
-router.get('/', auth.isAuth, auth.hashRole(AuthHelp.role('admin')), incidentControllers.viewIncidents);
-router.get('/:id', auth.isAuth, auth.isAuth, auth.hashRole(AuthHelp.role('admin')), incidentControllers.viewIncident);
-router.post('/create',  [ 
-        check('text').notEmpty(),
-        check('location').notEmpty(),
-        check('phone').notEmpty()
-    ],
+router.get('/', auth.isAuth, incidentControllers.viewIncidents);
+router.get('/:id', auth.isAuth, incidentControllers.viewIncident);
+router.post('/create', 
     auth.isAuth, 
-    upload.array('file'), 
-    incidentControllers.createIncident
+    incidentControllers.createIncident 
 );
-router.patch('/input/ticket',[
+router.patch('/:id/ticket', [
         check('team_id').notEmpty(),
         check('ticket').notEmpty(),
-        check('category_id').notEmpty()
+        check('category_id').notEmpty(),
+        check('stage_id').notEmpty().isNumeric()
     ],
     auth.isAuth,
     incidentControllers.inputTikcet

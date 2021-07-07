@@ -4,14 +4,38 @@ const fs = require('fs');
 const sequelize = require('../configs/connection');
 const moment = require('moment');
 const { v4:uuidv4 } =  require('uuid');
+const { validationResult } = require('express-validator');
 const db = require('../configs/database');
 
 const dbconfig = require('../configs/db.config');
 const { request } = require('http');
 const Incidents = dbconfig.incidents;
 const IncidentAttachments = dbconfig.incidentAttachments;
+const Stages = dbconfig.stages;
 const Teams = dbconfig.teams;
 const Categories = dbconfig.categories;
+const Users = dbconfig.users;
+
+const storage = require('../middlewares/upload');
+const upload = multer({ 
+    fileFilter: function  (req, file, cb) {   
+        let mimetype = file.mimetype;
+        errorMessage = [];
+        if(req.body.text === ""){
+            errorMessage.push({"text":"Tidak boleh kosong"})
+        }
+        if(req.body.location === ""){
+            errorMessage.push({"location":"Tidak boleh kosong"})
+        }
+        if(errorMessage.length > 0){
+            cb(new multer.MulterError(errorMessage));
+        }else if(mimetype === "image/jpeg"){
+            return cb(null,true);
+        } else {
+            cb(new multer.MulterError('extension not valid'));
+        }
+    },
+    storage:storage }).array('file');
 
 require('dotenv').config();
 
@@ -25,7 +49,13 @@ exports.viewIncidents = (req, res) => {
     const title = req.query.title;
     var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
 
-    Incidents.findAll({ where: condition })
+    Incidents.findAll({ 
+            include: [{
+                model: IncidentAttachments,
+                as: "incidentAttachments"
+            }],
+            where: condition 
+        })
         .then(data => {
             res.json({
                 "message":"Success",
@@ -47,7 +77,23 @@ exports.viewIncidents = (req, res) => {
  */
 exports.viewIncident = (req, res) => {
     try{
-        Incidents.findAll({ where: condition })
+        const id = req.params.id;
+        Incidents.findOne({ where: {id:id },
+            include: [
+                { 
+                    model: IncidentAttachments,
+                    as: "incidentAttachments" 
+                },
+                { 
+                    model: Stages,
+                    as: "stageIncidents" 
+                },
+                {
+                    model: Users,
+                    as: "userIncidents"
+                }
+            ] 
+        })
         .then(data => {
             res.send(data);
         })
@@ -60,8 +106,7 @@ exports.viewIncident = (req, res) => {
     }catch(err){
         res.json({
             "message":"Error",
-            "data":result,
-            "error":eror
+            "error":err
         }); 
         res.end();
     }
@@ -74,75 +119,68 @@ exports.viewIncident = (req, res) => {
  * @returns 
  */
 exports.createIncident = (req, res) => {
-    try {       
-        /*-- validation --*/
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ 
-                'message':'Error',
-                'send':req.body,
-                'data':[],
-                'errors': errors.array(), 
-            });
-        }
-        /*-- end validation --*/
-        
-        // inisiasi variabel
-        let text = req.body.text;
-        let location = req.body.location;
-        let phone = req.body.phone;
-        let user_id = req.body.user;
-        let stage_id = req.body.stage_id;
-        let createdAt = moment().format("YYYY-MM-DD HH:mm:ss");
-        let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
-        let insertStatus = false;
-        
-        // get data file uploads
-        let files = req.files;
-        let fileUploads = [];
-        files.forEach(element => {
-            fileUploads.push({
-                filename: element.filename,
-                filelocation:element.destination,
-                alias:element.originalname,
-                createdAt:createdAt,
-                updatedAt:updatedAt
-            });
-        });
-        // unique id with uuid
-        let idIndicent = uuidv4(); 
-        // insert data
-        Incidents.create({
-            id:idIndicent,
-            text:text,
-            location:location,
-            phone:phone,
-            userId:user_id,
-            stageId:stage_id,
-            createdAt:createdAt,
-            updatedAt:updatedAt,
-            incidentAttachments: fileUploads
-        },{
-            include: [
-                {
-                    model: IncidentAttachments,
-                    as: "incidentAttachments"
-                }
-            ]
-        })
-        .then(data => {
-            // if data inserted
-            res.json({"message":"Success"});
-            res.end();
-        })
-        .catch(err => {
-            // if error
-            res.status(500).send({
-            message:
-                err.message || "Error someting"
-            });
-        });    
-
+    try {        
+        upload(req, res, (err) => {            
+            if(err instanceof multer.MulterError) {
+                res.json({message:err})
+            }else{
+                 // inisiasi variabel
+                let text = req.body.text;
+                let location = req.body.location;
+                let phone = req.body.phone;
+                let user_id = req.body.user;
+                let stage_id = req.body.stage_id;
+                let createdAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                
+                // get data file uploads
+                let files = req.files;
+                let fileUploads = [];
+                files.forEach(element => {
+                    fileUploads.push({
+                        filename: element.filename,
+                        filelocation:element.destination,
+                        alias:element.originalname,
+                        createdAt:createdAt,
+                        updatedAt:updatedAt
+                    });
+                });
+                // unique id with uuid
+                let idIndicent = uuidv4(); 
+                // insert data
+                Incidents.create({
+                    id:idIndicent,
+                    text:text,
+                    location:location,
+                    phone:phone,
+                    userId:user_id,
+                    stageId:stage_id,
+                    createdAt:createdAt,
+                    updatedAt:updatedAt,
+                    incidentAttachments: fileUploads
+                },{
+                    include: [
+                        {
+                            model: IncidentAttachments,
+                            as: "incidentAttachments"
+                        }
+                    ]
+                })
+                .then(data => {
+                    // if data inserted
+                    res.json({"message":"Success"});
+                    res.end();
+                })
+                .catch(err => {
+                    // if error
+                    res.status(500).send({
+                    message:
+                        err.message || "Error someting"
+                    });
+                });   
+            }
+        })      
+       
     } catch(err) {
         // if error
         if(err.code == "LIMIT_FILE_SIZE"){

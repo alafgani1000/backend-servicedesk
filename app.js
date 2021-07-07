@@ -13,7 +13,6 @@ app.use(express.urlencoded({extended: true}));
 app.use(cors());
 const port = process.env.PORT || 4001;
 
-
 const index =  require('./routes/index');
 const user = require('./routes/user');
 const auth = require('./routes/auth');
@@ -23,7 +22,6 @@ const category = require('./routes/category');
 const stage = require('./routes/stage');
 const incident = require('./routes/incident')
 
-
 app.use(index);
 app.use('/api/user',user);
 app.use('/api/auth',auth);
@@ -32,7 +30,6 @@ app.use('/api/team',team);
 app.use('/api/category',category);
 app.use('/api/stage',stage);
 app.use('/api/incident',incident);
-
 
 let interval;
 io.on('connection', (socket) => {
