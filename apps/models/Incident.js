@@ -47,6 +47,12 @@ const Incident = sequelize.define('incidents', {
     categoryId: {
         type:DataTypes.INTEGER(2)
     },
+    sdate_ticket: {
+        type:DataTypes.DATEONLY
+    },
+    stime_ticket: {
+        type:DataTypes.TIME
+    },
     ticket_time: {
         type:DataTypes.DATE
     }

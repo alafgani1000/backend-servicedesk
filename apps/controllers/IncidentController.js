@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 const multer = require('multer');
 const fs = require('fs');
 const sequelize = require('../configs/connection');
-const moment = require('moment');
+const moment = require('moment-timezone');
 const { v4:uuidv4 } =  require('uuid');
 const { validationResult } = require('express-validator');
 const db = require('../configs/database');
@@ -17,6 +17,8 @@ const Categories = dbconfig.categories;
 const Users = dbconfig.users;
 
 const storage = require('../middlewares/upload');
+const User = require('../models/User');
+const { format } = require('../configs/database');
 const upload = multer({ 
     fileFilter: function  (req, file, cb) {   
         let mimetype = file.mimetype;
@@ -50,10 +52,34 @@ exports.viewIncidents = (req, res) => {
     var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
 
     Incidents.findAll({ 
-            include: [{
-                model: IncidentAttachments,
-                as: "incidentAttachments"
-            }],
+            include: [
+                {
+                    model: IncidentAttachments,
+                    as: "incidentAttachments"
+                },
+                { 
+                    model: Stages,
+                    as: "stageIncidents" 
+                },
+                {
+                    model: Users,
+                    as: "userIncidents",
+                    attributes:["id","name"]
+                },
+                {
+                    model: Users,
+                    as: "technicianIncident"
+                },
+                {
+                    model: Teams,
+                    as: "teamIncidents"
+                },
+                {
+                    model: Categories,
+                    as: "categoryIncidents",
+                    attributes: ["id","name"]
+                }
+            ],
             where: condition 
         })
         .then(data => {
@@ -82,15 +108,31 @@ exports.viewIncident = (req, res) => {
             include: [
                 { 
                     model: IncidentAttachments,
-                    as: "incidentAttachments" 
+                    as: "incidentAttachments",
+                    attributes:["id","filename","filelocation","alias","incidentId"]
                 },
                 { 
                     model: Stages,
-                    as: "stageIncidents" 
+                    as: "stageIncidents",
+                    attributes:["id","text","description"]
                 },
                 {
                     model: Users,
-                    as: "userIncidents"
+                    as: "userIncidents",
+                    attributes:["id","name"]
+                },
+                {
+                    model: Users,
+                    as: "technicianIncident"
+                },
+                {
+                    model: Teams,
+                    as: "teamIncidents"
+                },
+                {
+                    model: Categories,
+                    as: "categoryIncidents",
+                    attributes: ["id","name"]
                 }
             ] 
         })
@@ -261,7 +303,7 @@ exports.inputTikcet = (req, res) => {
         /*-- end validation --*/
          
         // initiate variable
-        let incidentId = req.param.id;
+        let incidentId = req.params.id;
         let teamId = req.body.team_id;
         let ticket = req.body.ticket;
         let categoryId = req.body.category_id;
@@ -269,8 +311,8 @@ exports.inputTikcet = (req, res) => {
         let validation = [];
 
         // create measage validation
-        const validasi_team = { team: 'Team tidak ditemukan' };
-        const validasi_category = { category: 'Kategori tidak ditemukan' };
+        const validasi_team = { "team": 'Team tidak ditemukan' };
+        const validasi_category = { "category": 'Kategori tidak ditemukan' };
         // get data team valid in database
         let team = Teams.findOne({ where: { id:teamId } });
         let category = Categories.findOne({ where: { id:categoryId } });
@@ -288,14 +330,15 @@ exports.inputTikcet = (req, res) => {
                 "error":validation
             })
         }else{
-            let dateNow = moment().format("YYYY-MM-DD HH:mm:ss");
-            let ticketTime = dateNow.add(Category.time_interval, 'hours');
-
-            Incident.update({
+            const dateNow = moment();
+            const today = dateNow.format('YYYY-MM-DD HH:mm:ss');
+            // let ticketTime = dateNow.clone().add(category.time_interval, 'hours').format('YYYY-MM-DD HH:mm:ss');
+            Incidents.update({
                 teamId: teamId,
                 ticket: ticket,
                 categoryId: categoryId,
-                ticket_time: ticketTime,
+                start_ticket: today,
+                // ticket_time: ticketTime,
                 stageId: stageId
             }, {
                 where: {
