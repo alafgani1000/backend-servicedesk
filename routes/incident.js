@@ -23,5 +23,13 @@ router.patch('/:id/ticket', [
     auth.isAuth,
     incidentControllers.inputTikcet
 );
+router.patch('/:id/resolve',
+    auth.isAuth,
+    incidentControllers.resolve
+);
+router.patch('/:id/close', 
+    auth.isAuth,
+    incidentControllers.close
+);
 
 module.exports = router;

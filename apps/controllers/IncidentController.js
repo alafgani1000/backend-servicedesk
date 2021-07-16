@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 const multer = require('multer');
 const fs = require('fs');
 const sequelize = require('../configs/connection');
-const moment = require('moment-timezone');
+const moment = require('moment');
 const { v4:uuidv4 } =  require('uuid');
 const { validationResult } = require('express-validator');
 const db = require('../configs/database');
@@ -288,7 +288,7 @@ exports.updateIncident = (req, res) => {
  * @param {*} res 
  * @returns 
  */
-exports.inputTikcet = (req, res) => {
+exports.inputTikcet = async (req, res) => {
     try {
         /*-- validation --*/
         const errors = validationResult(req);
@@ -310,12 +310,22 @@ exports.inputTikcet = (req, res) => {
         let stageId = req.body.stage_id;
         let validation = [];
 
-        // create measage validation
+        // create message validation
+        let datateam
         const validasi_team = { "team": 'Team tidak ditemukan' };
         const validasi_category = { "category": 'Kategori tidak ditemukan' };
         // get data team valid in database
-        let team = Teams.findOne({ where: { id:teamId } });
-        let category = Categories.findOne({ where: { id:categoryId } });
+
+        // category
+        const category = await Categories.findOne({ where: { id:categoryId } })
+        .then(result => {
+            return result;
+        });
+        
+        const team = Teams.findOne({ where: { id:teamId } })
+        .then(result => {
+            return result;
+        });
 
         // validation data
         if(team === null){
@@ -330,15 +340,21 @@ exports.inputTikcet = (req, res) => {
                 "error":validation
             })
         }else{
-            const dateNow = moment();
-            const today = dateNow.format('YYYY-MM-DD HH:mm:ss');
-            // let ticketTime = dateNow.clone().add(category.time_interval, 'hours').format('YYYY-MM-DD HH:mm:ss');
+            let dateNow = moment();
+            const sdate = dateNow.format('YYYY-MM-DD');
+            const stime = dateNow.format('HH:mm:ss');
+            let endDay = dateNow.clone();
+            endDay = endDay.add(category.time_interval, 'hours');
+            const edate = endDay.format('YYYY-MM-DD');
+            const etime = endDay.format('HH:mm:ss');
             Incidents.update({
                 teamId: teamId,
                 ticket: ticket,
                 categoryId: categoryId,
-                start_ticket: today,
-                // ticket_time: ticketTime,
+                sdate_ticket: sdate,
+                stime_ticket: stime,
+                edate_ticket: edate,
+                etime_ticket: etime,
                 stageId: stageId
             }, {
                 where: {
@@ -357,7 +373,6 @@ exports.inputTikcet = (req, res) => {
                 });
             });
         }
-        
     } catch(err) {
         res.status(500).json({
             message: `Error occured: ${err}`,
@@ -374,14 +389,18 @@ exports.resolve = (req, res) => {
     try {
         // initiate variable
         let incidentId = req.params.id;
-        let resolveText = req.body.reslove_text;
-        let resolveDate = req.body.resolve_date;
+        let resolveText = req.body.resolve_text;
+        let dateNow = moment();
+        let resolveDate = dateNow.format('YYYY-MM-DD');
+        let resolveTime = dateNow.format('HH:mm:ss');
         let teknisi = req.body.teknisi;
         let stageId = req.body.stage_id;
+
         // update data
-        Incident.update({
-           reslove_text:resolveText,
+        Incidents.update({
+           resolve_text:resolveText,
            resolve_date:resolveDate,
+           resolve_time:resolveTime,
            user_technician:teknisi,
            stageId:stageId
         }, {
@@ -412,14 +431,34 @@ exports.resolve = (req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-exports.close = (req, res) => {
+exports.close = async (req, res) => {
     try {
         // initiate variable
         let incidentId = req.params.id;
         let stageId = req.body.stage_id;
+
+        const incident = await Incidents.findByPk(incidentId)
+        .then(result => {
+            return result;
+        });
+        
+        const dateNow = moment();
+        const date = dateNow.format('YYYY-MM-DD');
+        const time = dateNow.format('HH:mm:ss');
+        const sdate = incident.sdate_ticket;
+        const stime = incident.stime_ticket;
+        const rdate = incident.resolve_date;
+        const rtime = incident.resolve_time;
+        const startDate = moment(sdate+' '+stime);
+        const resolveDate = moment(rdate+' '+rtime);
+        var intervalTime = resolveDate.diff(startDate, 'minutes');
+
         // update data
-        Incident.update({
-           stageId:stageId
+        Incidents.update({
+           stageId:stageId,
+           interval_resolve:intervalTime,
+           close_date:date,
+           close_time:time
         }, {
             where: {
                 id:incidentId
@@ -427,7 +466,7 @@ exports.close = (req, res) => {
         })
         .then(data => {
             res.status(200).json({
-                "message":"Resolved"
+                "message":"Close"
             });
             res.end();
         })

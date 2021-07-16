@@ -35,7 +35,10 @@ const Incident = sequelize.define('incidents', {
         allowNull:true
     },
     resolve_date: {
-        type:DataTypes.DATE
+        type:DataTypes.DATEONLY
+    },
+    resolve_time: {
+        type:DataTypes.TIME
     },
     teamId: {
         type:DataTypes.INTEGER,
@@ -53,8 +56,21 @@ const Incident = sequelize.define('incidents', {
     stime_ticket: {
         type:DataTypes.TIME
     },
-    ticket_time: {
-        type:DataTypes.DATE
+    edate_ticket: {
+        type:DataTypes.DATEONLY
+    },
+    etime_ticket: {
+        type:DataTypes.TIME
+        
+    },
+    close_date: {
+        type:DataTypes.DATEONLY
+    },
+    close_time: {
+        type:DataTypes.TIME
+    },
+    interval_resolve: {
+        type:DataTypes.INTEGER
     }
 })
 
