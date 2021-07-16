@@ -311,7 +311,7 @@ exports.inputTikcet = async (req, res) => {
         let validation = [];
 
         // create message validation
-        let datateam
+        let datateam;
         const validasi_team = { "team": 'Team tidak ditemukan' };
         const validasi_category = { "category": 'Kategori tidak ditemukan' };
         // get data team valid in database
@@ -494,6 +494,19 @@ exports.updateAttachment = (req, res) => {
         const fileName = req.files.filename;
         const fileLocation = req.files.destination
         const alias = req.files.originalname;
+
+        let files = req.files;
+        let fileUploads = [];
+        files.forEach(element => {
+            fileUploads.push({
+                filename: element.filename,
+                filelocation:element.destination,
+                alias:element.originalname,
+                createdAt:createdAt,
+                updatedAt:updatedAt
+            });
+        });
+
         IncidentAattachments.update({
             filename:fileName,
             filelocation:fileLocation,
