@@ -31,5 +31,12 @@ router.patch('/:id/close',
     auth.isAuth,
     incidentControllers.close
 );
-
+router.patch('/:id/attachment',
+    auth.isAuth,
+    incidentControllers.updateAttachment
+);
+router.delete('/:id/delete',
+    auth.isAuth,
+    incidentControllers.deleteAttachment
+);
 module.exports = router;

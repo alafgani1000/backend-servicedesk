@@ -19,8 +19,9 @@ const Users = dbconfig.users;
 const storage = require('../middlewares/upload');
 const User = require('../models/User');
 const { format } = require('../configs/database');
+const { incidentAttachments } = require('../configs/db.config');
 const upload = multer({ 
-    fileFilter: function  (req, file, cb) {   
+    fileFilter: function (req, file, cb) {   
         let mimetype = file.mimetype;
         errorMessage = [];
         if(req.body.text === ""){
@@ -123,7 +124,8 @@ exports.viewIncident = (req, res) => {
                 },
                 {
                     model: Users,
-                    as: "technicianIncident"
+                    as: "technicianIncident",
+                    attributes: ["name","username"]
                 },
                 {
                     model: Teams,
@@ -137,7 +139,7 @@ exports.viewIncident = (req, res) => {
             ] 
         })
         .then(data => {
-            res.send(data);
+            res.status(200).send(data);
         })
         .catch(err => {
             res.status(500).send({
@@ -490,41 +492,66 @@ exports.close = async (req, res) => {
  */
 exports.updateAttachment = (req, res) => {
     try {
-        const attachmentId = request.params.id;
-        const fileName = req.files.filename;
-        const fileLocation = req.files.destination
-        const alias = req.files.originalname;
-
-        let files = req.files;
-        let fileUploads = [];
-        files.forEach(element => {
-            fileUploads.push({
-                filename: element.filename,
-                filelocation:element.destination,
-                alias:element.originalname,
-                createdAt:createdAt,
-                updatedAt:updatedAt
-            });
-        });
-
-        IncidentAattachments.update({
-            filename:fileName,
-            filelocation:fileLocation,
-            alias:alias
-        }, {
-            where: {
-                id:attachmentId
+        upload(req, res, async (err) => {            
+            if(err instanceof multer.MulterError) {
+                res.json({message:err})
+            }else{
+                // parameter id
+                const attachmentId = req.params.id;
+                // upload files
+                let files = req.files;
+                let createdAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let fileUploads = [];
+                files.forEach(element => {
+                    fileUploads.push({
+                        filename: element.filename,
+                        filelocation:element.destination,
+                        alias:element.originalname,
+                        createdAt:createdAt,
+                        updatedAt:updatedAt
+                    });
+                });
+                // get data attachment
+                const attachments = await IncidentAttachments.findByPk(attachmentId)
+                .then(data => {
+                    return data;
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        message: `Error occured: ${err}`
+                    });
+                });
+                // delete file
+                const pathDelete = attachments.filelocation;
+                const fileNameOld = attachments.filename;
+                const fileOld = pathDelete+'/'+fileNameOld;
+                fs.unlink(fileOld, (err) => {
+                    if(err){
+                        return
+                    }
+                });
+                // update file attachment
+                IncidentAttachments.update({
+                    filename:fileUploads[0].filename,
+                    filelocation:fileUploads[0].filelocation,
+                    alias:fileUploads[0].alias
+                }, {
+                    where: {
+                        id:attachmentId
+                    }
+                })
+                .then(data => {
+                    res.status(200).json({
+                        "message":"Updated"
+                    });
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        "message":`Error occured: ${err}`
+                    });
+                })
             }
-        })
-        .then(data => {
-            res.status(200).json({
-                "message":"Updated"
-            });
-        })
-        .catch(err => {
-            res.status(500).json({
-                "message":`Error occured: ${err}`
-            });
         })
     } catch(err) {
         res.status(500).json({
@@ -538,9 +565,21 @@ exports.updateAttachment = (req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-exports.deleteAttachment = (req, res) => {
-    const attachmentId = req.params.id;
+exports.deleteAttachment = async (req, res) => {
     try {
+        const attachmentId = req.params.id;
+        const attachment = incidentAttachments.findByPk(attachmentId)
+        .then(data => {
+            return data;
+        });
+        const filename = attachment.filename;
+        const filelocation = attachment.filelocation;
+        const fileDelete = filelocation+'/'+filename;
+        fs.unlink(fileDelete, (err) => {
+            if(err){
+                return
+            }
+        });
         IncidentAttachments.destroy({
             where: {
                 id:attachmentId
