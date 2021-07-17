@@ -39,4 +39,8 @@ router.delete('/:id/delete',
     auth.isAuth,
     incidentControllers.deleteAttachment
 );
+router.post('/attachment',
+    auth.isAuth,
+    incidentControllers.inputAttachment
+);
 module.exports = router;

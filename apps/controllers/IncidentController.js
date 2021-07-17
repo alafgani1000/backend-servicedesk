@@ -69,7 +69,8 @@ exports.viewIncidents = (req, res) => {
                 },
                 {
                     model: Users,
-                    as: "technicianIncident"
+                    as: "technicianIncident",
+                    attributes: ["name","username"]
                 },
                 {
                     model: Teams,
@@ -561,6 +562,59 @@ exports.updateAttachment = (req, res) => {
 }
 
 /**
+ * upload attachment
+ * @param {*} req
+ * @param {*} res
+ */
+ exports.inputAttachment = (req, res) => {
+    try {
+        upload(req, res, async (err) => {            
+            if(err instanceof multer.MulterError) {
+                res.json({message:err})
+            }else{
+                // parameter id
+                const incidentId = req.body.id;
+                // upload files
+                let files = req.files;
+                let createdAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let fileUploads = [];
+                files.forEach(element => {
+                    fileUploads.push({
+                        filename: element.filename,
+                        filelocation:element.destination,
+                        alias:element.originalname,
+                        createdAt:createdAt,
+                        updatedAt:updatedAt
+                    });
+                });
+                // update file attachment
+                IncidentAttachments.create({
+                    filename:fileUploads[0].filename,
+                    filelocation:fileUploads[0].filelocation,
+                    alias:fileUploads[0].alias,
+                    incidentId:incidentId
+                })
+                .then(data => {
+                    res.status(200).json({
+                        "message":"Updated"
+                    });
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        "message":`Error occured: ${err}`
+                    });
+                })
+            }
+        })
+    } catch(err) {
+        res.status(500).json({
+            message: `Error occured: ${err}`
+        });
+    }
+}
+
+/**
  * delete attachment
  * @param {*} req 
  * @param {*} res 
@@ -568,36 +622,49 @@ exports.updateAttachment = (req, res) => {
 exports.deleteAttachment = async (req, res) => {
     try {
         const attachmentId = req.params.id;
-        const attachment = incidentAttachments.findByPk(attachmentId)
+        const attachment = await incidentAttachments.findByPk(attachmentId)
         .then(data => {
             return data;
-        });
-        const filename = attachment.filename;
-        const filelocation = attachment.filelocation;
-        const fileDelete = filelocation+'/'+filename;
-        fs.unlink(fileDelete, (err) => {
-            if(err){
-                return
-            }
-        });
-        IncidentAttachments.destroy({
-            where: {
-                id:attachmentId
-            }
         })
-        .then(data => {
-            res.status(200).json({
-                "message":"Deleted"
-            })
-        })
-        .catch(err => {
+        .catch((err) => {
             res.status(500).json({
                 message: `Error occured: ${err}`
+            }); 
+        });
+        if(attachment === undefined){
+            res.status(400).json({
+                message: `Data not found!`
             });
-        })
+        }else{
+            const filename = attachment.filename;
+            const filelocation = attachment.filelocation;
+            const fileDelete = filelocation+'/'+filename;
+            // delete file
+            fs.unlink(fileDelete, (error) => {
+                if(error){
+                    return
+                }
+            });
+            // delete dile
+            IncidentAttachments.destroy({
+                where: {
+                    id:attachmentId
+                }
+            })
+            .then(data => {
+                res.status(200).json({
+                    "message":"Deleted"
+                })
+            })
+            .catch(err => {
+                res.status(500).json({
+                    message: `Error occured: ${err}`
+                });
+            })
+        }
     } catch(err) {
         res.status(500).json({
-            message: `Error  occured: ${error}`
+            message: `Error  occured: ${err}`
         });
     }
 }
