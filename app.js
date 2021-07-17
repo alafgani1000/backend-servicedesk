@@ -21,6 +21,7 @@ const team = require('./routes/team');
 const category = require('./routes/category');
 const stage = require('./routes/stage');
 const incident = require('./routes/incident')
+const request = require('./routes/request');
 
 app.use(index);
 app.use('/api/user',user);
@@ -30,6 +31,7 @@ app.use('/api/team',team);
 app.use('/api/category',category);
 app.use('/api/stage',stage);
 app.use('/api/incident',incident);
+app.use('/api/request',request);
 
 let interval;
 io.on('connection', (socket) => {

@@ -25,27 +25,38 @@ const Request = sequelize.define('requests', {
     },
     phone: {
         type: DataTypes.STRING(14),
-        allowNull: false
+        allowNull: true
     },
     location: {
         type: DataTypes.STRING(255),
-        allowNull: false
+        allowNull: true
     },
     stageId: {
         type: DataTypes.INTEGER(11),
         allowNull: true
     },
-    plan_start_date: {
-        type: DataTypes.DATE,
-        allowNull: false
+    start_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: true
     },
-    plan_end_date: {
-        type: DataTypes.DATE,
-        allowNull: false
+    start_time: {
+        type: DataTypes.TIME,
+        allowNull: true
+    },
+    end_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: true
+    },
+    end_time: {
+        type: DataTypes.TIME,
+        allowNull: true
     },
     resolve_date: {
-        type: DataTypes.DATE,
-        allowNull: false
+        type: DataTypes.DATEONLY,
+        allowNull: true
+    },
+    resolve_time: {
+        type: DataTypes.TIME
     }
 });
 

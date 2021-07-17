@@ -3,9 +3,10 @@ const sequelize = require('../configs/connection');
 
 const RequestAttachment = sequelize.define('request_attachments', {
     id: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
+        autoIncrement: true
     },
     file_name: {
         type: DataTypes.STRING,
