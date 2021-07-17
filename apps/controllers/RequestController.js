@@ -38,8 +38,75 @@ const upload = multer({
 
 require('dotenv').config();
 
+
 /**
- * input incident
+ * menampilkan request
+ * @param {*} req 
+ * @param {*} res 
+ */
+ exports.viewRequests = (req, res) => {
+    const title = req.query.title;
+    var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
+
+    Requests.findAll({ 
+            include: [
+                {
+                    model: RequestAttachments,
+                    as: "requestAttachments"
+                }
+            ],
+            where: condition 
+        })
+        .then(data => {
+            res.json({
+                "message":"Success",
+                "data":data
+            });
+        })
+        .catch(err => {
+            res.status(500).send({
+            message:
+                err.message || "Error someting"
+            });
+        });
+}
+
+/**
+ * menampilkan incident per id
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.viewRequest = (req, res) => {
+    try{
+        const id = req.params.id;
+        Requests.findOne({ where: {id:id },
+            include: [
+                {
+                    model: RequestAttachments,
+                    as: "requestAttachments"
+                }
+            ] 
+        })
+        .then(data => {
+            res.status(200).send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+            message:
+                err.message || "Error someting"
+            });
+        });
+    }catch(err){
+        res.json({
+            "message":"Error",
+            "error":err
+        }); 
+        res.end();
+    }
+}
+
+/**
+ * input request
  * @param {*} req 
  * @param {*} res 
  * @returns 
