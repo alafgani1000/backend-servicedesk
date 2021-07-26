@@ -191,3 +191,49 @@ exports.viewRequest = (req, res) => {
         });
     }
 }
+
+/**
+ * permintaan disetujui dan waktu pengerjaannya sudah ditentukan
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+exports.openRequest = (req, res) => {
+    try {
+        // initiate variable
+        const requestId = req.params.id;
+        const startDate = req.body.start_date;
+        const startTime = req.body.start_time;
+        const endDate = req.body.end_date;
+        const endTime = req.body.end_time;
+        const stageId = req.body.stage_id;
+
+        // update data
+        Requests.update({
+           start_date:startDate,
+           start_time:startTime,
+           end_date:endDate,
+           end_time:endTime,
+           stageId:stageId
+        }, {
+            where: {
+                id:requestId
+            }
+        })
+        .then(data => {
+            res.status(200).json({
+                "message":"Resolved"
+            });
+            res.end();
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: `Error occured: ${err}`,
+            });
+        });
+    } catch(err) {
+        res.status(500).json({
+            message: `Error occured: ${err}`,
+        });
+    }
+}
