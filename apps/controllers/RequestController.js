@@ -222,6 +222,47 @@ exports.openRequest = (req, res) => {
         })
         .then(data => {
             res.status(200).json({
+                "message":"Request open, permintaan pemnbuatan aplikasi telah di setejui"
+            });
+            res.end();
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: `Error occured: ${err}`,
+            });
+        });
+    } catch(err) {
+        res.status(500).json({
+            message: `Error occured: ${err}`,
+        });
+    }
+}
+
+/**
+ * pengerjaan telah diselesaikan oleh departemen it
+ * @param {*} req
+ * @param {*} res
+ */
+exports.resolveRequest = (req, res) => {
+    try {
+        // initiate variable
+        const requestId = req.params.id;
+        const stageId = req.body.stage_id;
+        const resolveDate = req.body.resolve_date;
+        const resolveTime = req.body.resolve_time;
+    
+        // update data
+        Requests.update({
+           stageId:stageId,
+           resolve_date:resolveDate,
+           resolve_time:resolveTime,
+        }, {
+            where: {
+                id:requestId
+            }
+        })
+        .then(data => {
+            res.status(200).json({
                 "message":"Resolved"
             });
             res.end();
@@ -232,6 +273,45 @@ exports.openRequest = (req, res) => {
             });
         });
     } catch(err) {
+        res.status(500).json({
+            message: `Error occured: ${err}`,
+        });
+    }
+}
+
+/**
+ * close, aplikasi telah di approve oleh user
+ * @param {*} req
+ * @param {*} res
+ */
+exports.closeRequest = (req, res) => {
+    try{
+        const requestId = req.params.id;
+        const stageId = req.body.stage_id;
+        const closeDate = req.body.close_date;
+        const closeTime = req.body.close_time;
+
+        Requests.update({
+            stageId:stageId,
+            close_date:closeDate,
+            close_time:closeTime
+        }, {
+           where: {
+                id:requestId
+           } 
+        })
+        .then(err => {
+            res.status(200).json({
+                message:`Resolve`
+            });
+            res.end();
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: `Error occured: ${err}`,
+            });
+        })
+    }catch(err){
         res.status(500).json({
             message: `Error occured: ${err}`,
         });

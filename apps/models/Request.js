@@ -56,7 +56,16 @@ const Request = sequelize.define('requests', {
         allowNull: true
     },
     resolve_time: {
-        type: DataTypes.TIME
+        type: DataTypes.TIME,
+        allowNull: true
+    },
+    close_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: true
+    },
+    close_time: {
+        type: DataTypes.TIME,
+        allowNull: true
     }
 });
 
