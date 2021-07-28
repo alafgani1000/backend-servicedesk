@@ -128,6 +128,128 @@ exports.viewRequest = (req, res) => {
 }
 
 /**
+ * 
+ * @param {*} req 
+ * @param {*} res
+ *  
+ */
+ exports.updateRequest = (req, res) => {
+    // inisiasi variabel
+    const requestId = req.params.id;
+    const title = req.body.title;
+    const businessNeed = req.body.business_need;
+    const businessValue = req.body.business_value;
+    const location = req.body.location;
+    const phone = req.body.phone;
+    const updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+    try{
+        // update request
+        Requests.update({
+            title:title,
+            business_need:businessNeed,
+            business:businessValue,
+            location:location,
+            phone:phone,
+            updatedAt:updatedAt
+        }, {
+            where: {
+                id:requestId
+            }
+        })
+        .then(data => {
+            res.status(200).json({
+                "message":"Request Updated"
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                message:`Error occured: ${err}`
+            })
+        })
+    } catch(err) {
+        res.status(500).json({
+            message: `Error occured: ${err}`
+        });
+    }
+}
+
+/**
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+ exports.updateAttachment = (req, res) => {
+    try {
+        upload(req, res, async (err) => {            
+            if(err instanceof multer.MulterError) {
+                res.json({message:err})
+            }else{
+                // parameter id
+                const attachmentId = req.params.id;
+                // upload files
+                let files = req.files;
+                let createdAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let fileUploads = [];
+                files.forEach(element => {
+                    fileUploads.push({
+                        filename: element.filename,
+                        filelocation:element.destination,
+                        alias:element.originalname,
+                        createdAt:createdAt,
+                        updatedAt:updatedAt
+                    });
+                });
+                // get data attachment
+                const attachments = await RequestAttachments.findByPk(attachmentId)
+                .then(data => {
+                    return data;
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        message: `Error occured: ${err}`
+                    });
+                });
+                // delete file
+                const pathDelete = attachments.filelocation;
+                const fileNameOld = attachments.filename;
+                const fileOld = pathDelete+'/'+fileNameOld;
+                fs.unlink(fileOld, (err) => {
+                    if(err){
+                        return
+                    }
+                });
+                // update file attachment
+                RequestAttachments.update({
+                    file_name:fileUploads[0].filename,
+                    file_location:fileUploads[0].filelocation,
+                    alias:fileUploads[0].alias
+                }, {
+                    where: {
+                        id:attachmentId
+                    }
+                })
+                .then(data => {
+                    res.status(200).json({
+                        "message":"Attachment Updated"
+                    });
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        "message":`Error occured: ${err}`
+                    });
+                })
+            }
+        })
+    } catch(err) {
+        res.status(500).json({
+            message: `Error occured: ${err}`
+        });
+    }
+}
+
+/**
  * input request
  * @param {*} req 
  * @param {*} res 

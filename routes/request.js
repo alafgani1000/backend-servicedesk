@@ -6,6 +6,7 @@ const AuthHelp = require('../apps/helpers/AuthHelper');
 const { check } = require('express-validator');
 const multer = require('multer');
 const storage = require('../apps/middlewares/upload');
+const { route } = require('./incident');
 const upload = multer({ storage:storage });
 
 router.get('/',
@@ -31,6 +32,14 @@ router.patch('/:id/resolve',
 router.patch('/:id/close',
     auth.isAuth,
     requestControllers.closeRequest
+);
+router.patch('/:id/attachment',
+    auth.isAuth,
+    requestControllers.updateAttachment
+)
+router.patch('/:id/update',
+    auth.isAuth,
+    requestControllers.updateRequest
 );
 
 module.exports = router;
