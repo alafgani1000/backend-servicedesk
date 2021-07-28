@@ -12,6 +12,8 @@ const Categories = dbconfig.categories;
 const Users = dbconfig.users;
 
 const storage = require('../middlewares/upload');
+const { stages } = require('../configs/db.config');
+const User = require('../models/User');
 
 const upload = multer({ 
     fileFilter: function (req, file, cb) {   
@@ -53,6 +55,16 @@ require('dotenv').config();
                 {
                     model: RequestAttachments,
                     as: "requestAttachments"
+                },
+                {
+                    model: Stages,
+                    as: "stagesRequests",
+                    attributes: ["text","description"]
+                },
+                {
+                    model: Users,
+                    as: "userRequests",
+                    attributes: ["name"]
                 }
             ],
             where: condition 
@@ -84,6 +96,16 @@ exports.viewRequest = (req, res) => {
                 {
                     model: RequestAttachments,
                     as: "requestAttachments"
+                },
+                {
+                    model: Stages,
+                    as: "stagesRequests",
+                    attributes: ["text","description"]
+                },
+                {
+                    model: Users,
+                    as: "userRequests",
+                    attributes: ["name"]
                 }
             ] 
         })

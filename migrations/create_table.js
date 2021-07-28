@@ -11,7 +11,7 @@ const Role = require('../apps/models/Role');
 const Stage = require('../apps/models/Stage');
 const User = require('../apps/models/User');
 const UserTeam = require('../apps/models/UserTeams');
-sequelize.sync();
+// sequelize.sync();
 
 // Incident.sync();
 // IncidentAattachments.sync();
@@ -19,7 +19,7 @@ sequelize.sync();
 // Menu.sync();
 // MenuRole.sync();
 Request.sync();
-RequestAttachment.sync();
+// RequestAttachment.sync();
 // Role.sync();
 // Stage.sync();
 // User.sync();

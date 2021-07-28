@@ -9,11 +9,11 @@ const storage = require('../apps/middlewares/upload');
 const upload = multer({ storage:storage });
 
 router.get('/',
-    router.isAuth,
+    auth.isAuth,
     requestControllers.viewRequests
 );
 router.get('/:id/',
-    router.isAuth,
+    auth.isAuth,
     requestControllers.viewRequest
 );
 router.post('/create', 

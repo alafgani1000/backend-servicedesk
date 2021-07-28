@@ -21,15 +21,11 @@ db.requestAttachments = require('../models/RequestAttachment');
 db.stages = require('../models/Stage');
 db.users = require('../models/User');
 
+// incident
 db.incidents.hasMany(db.incidentAttachments, { as:"incidentAttachments" });
 db.incidentAttachments.belongsTo(db.incidents, {
   foreignKey: "incidentId",
   as: "incidents"
-});
-db.requests.hasMany(db.requestAttachments, { as:"requestAttachments" });
-db.requestAttachments.belongsTo(db.requests, {
-  foreignKey: "requestId",
-  as: "request"
 });
 db.stages.hasMany(db.incidents, { as:"incidentStages"});
 db.incidents.belongsTo(db.stages, {
@@ -54,5 +50,22 @@ db.categories.hasMany(db.incidents, { as:"incidentCategories" });
 db.incidents.belongsTo(db.categories, {
   foreignKey: "categoryId",
   as: "categoryIncidents"
+})
+
+// request
+db.requests.hasMany(db.requestAttachments, { as:"requestAttachments" });
+db.requestAttachments.belongsTo(db.requests, {
+  foreignKey: "requestId",
+  as: "request"
+});
+db.stages.hasMany(db.requests, { as:"requestStages" });
+db.requests.belongsTo(db.stages, {
+  foreignKey: "stageId",
+  as: "stagesRequests"
+});
+db.users.hasMany(db.requests, { as:"requestUsers" });
+db.requests.belongsTo(db.users, {
+  foreignKey: "userId",
+  as: "userRequests"
 })
 module.exports = db;
