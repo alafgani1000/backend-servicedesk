@@ -285,7 +285,7 @@ exports.resolveRequest = (req, res) => {
         })
         .then(data => {
             res.status(200).json({
-                "message":"Resolved"
+                "message":"Request Resolved"
             });
             res.end();
         })
@@ -324,7 +324,7 @@ exports.closeRequest = (req, res) => {
         })
         .then(err => {
             res.status(200).json({
-                message:`Resolve`
+                message:`Request Closed`
             });
             res.end();
         })
