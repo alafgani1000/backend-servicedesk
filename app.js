@@ -11,6 +11,7 @@ const cors = require('cors');
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cors());
+app.use('/static/file',express.static('upload')); 
 const port = process.env.PORT || 4001;
 
 const index =  require('./routes/index');

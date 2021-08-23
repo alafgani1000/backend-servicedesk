@@ -32,7 +32,7 @@ const upload = multer({
         }
         if(errorMessage.length > 0){
             cb(new multer.MulterError(errorMessage));
-        }else if(mimetype === "image/jpeg"){
+        }else if(mimetype === "image/jpeg" || mimetype === "image/png"){
             return cb(null,true);
         } else {
             cb(new multer.MulterError('extension not valid'));
@@ -180,6 +180,7 @@ exports.createIncident = (req, res) => {
                 
                 // get data file uploads
                 let files = req.files;
+                console.log(files);
                 let fileUploads = [];
                 files.forEach(element => {
                     fileUploads.push({
