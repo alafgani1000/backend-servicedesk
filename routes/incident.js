@@ -6,6 +6,7 @@ const AuthHelp = require('../apps/helpers/AuthHelper');
 const { check } = require('express-validator');
 const multer = require('multer');
 const storage = require('../apps/middlewares/upload');
+const { incidentAttachments } = require('../apps/configs/db.config');
 const upload = multer({ storage:storage });
 
 router.get('/', auth.isAuth, incidentControllers.viewIncidents);
@@ -42,5 +43,9 @@ router.delete('/:id/delete',
 router.post('/attachment',
     auth.isAuth,
     incidentControllers.inputAttachment
+);
+router.delete('/:id/incidentdelete',
+    auth.isAuth,
+    incidentControllers.deleteIncident
 );
 module.exports = router;

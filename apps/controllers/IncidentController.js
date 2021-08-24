@@ -242,6 +242,41 @@ exports.createIncident = (req, res) => {
 }
 
 /**
+ * Delete incident
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.deleteIncident = (req, res) => {
+    // inisiasi valriabel
+    const incidentId = req.params.id;
+
+    try{
+        // delete 
+        Incidents.destroy({
+            where: {
+                id:incidentId
+            }
+        })
+        .then(data => {
+            res.status(200).json({
+                "message":"Deleted"
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: `Error occured: ${err}`
+            });
+        })
+    }catch(err){
+        res.json({
+            message: `Error occured: ${err}`
+        })
+    }
+   
+
+}
+
+/**
  * update data incident
  * @param {*} req 
  * @param {*} res 
