@@ -173,14 +173,14 @@ exports.createIncident = (req, res) => {
                 let text = req.body.text;
                 let location = req.body.location;
                 let phone = req.body.phone;
-                let user_id = req.body.user;
+                let user_id = idLogin;
                 let stage_id = req.body.stage_id;
                 let createdAt = moment().format("YYYY-MM-DD HH:mm:ss");
                 let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
                 
                 // get data file uploads
                 let files = req.files;
-                console.log(files);
+                // console.log(idLogin);
                 let fileUploads = [];
                 files.forEach(element => {
                     fileUploads.push({

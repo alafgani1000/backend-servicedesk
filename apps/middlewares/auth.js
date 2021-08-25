@@ -22,6 +22,7 @@ exports.isAuth = (req, res, next) => {
                      res.end()
                 }else{
                     if(result[0].token === token){
+                        global.idLogin = result[0].id
                         next();
                     }else{
                         res.status(401).json({
