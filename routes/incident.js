@@ -24,6 +24,10 @@ router.patch('/:id/ticket', [
     auth.isAuth,
     incidentControllers.inputTikcet
 );
+router.patch('/:id/update',
+    auth.isAuth,
+    incidentControllers.updateIncident    
+)
 router.patch('/:id/resolve',
     auth.isAuth,
     incidentControllers.resolve
