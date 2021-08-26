@@ -140,7 +140,10 @@ exports.viewIncident = (req, res) => {
             ] 
         })
         .then(data => {
-            res.status(200).send(data);
+            res.json({
+                "message":"Success",
+                "data":data
+            });
         })
         .catch(err => {
             res.status(500).send({

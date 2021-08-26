@@ -60,7 +60,7 @@ exports.getStage = (req, res) => {
                     if(result.length > 0){
                         res.json({
                             'message':'Success',
-                            'data':result,
+                            'data':result[0],
                             'error':error
                         });
                         res.end();
