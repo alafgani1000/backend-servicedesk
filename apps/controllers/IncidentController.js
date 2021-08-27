@@ -286,16 +286,17 @@ exports.deleteIncident = (req, res) => {
  */
 exports.updateIncident = (req, res) => {
     // inisiasi variabel
+    console.log(req.body);
     const incidentId = req.params.id;
     let text = req.body.text;
     let location = req.body.location;
     let phone = req.body.phone;
-    let user_id = req.body.user;
+    let user_id = idLogin;
     let stage_id = req.body.stage_id;
     let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
     try{
         // update incident
-        Incident.update({
+        Incidents.update({
             text:text,
             location:location,
             phone:phone,
