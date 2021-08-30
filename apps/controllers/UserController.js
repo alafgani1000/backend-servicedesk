@@ -2,6 +2,9 @@ const bcrypt = require('bcrypt');
 const db = require('../configs/database');
 const { validationResult } = require('express-validator');
 const moment = require('moment');
+const dbconfig = require('../configs/db.config');
+const Users = dbconfig.users;
+const Roles = dbconfig.roles;
 
 exports.getUser = (req, res) => {
     let userId = req.params.id;
@@ -26,16 +29,31 @@ exports.getUser = (req, res) => {
 }
 
 exports.getUsers = (req, res) => {
-    db.connect((err) => {
-        let getUsersQuery = 'SELECT * FROM users';
-        db.query(getUsersQuery,[], (error, result, fields) => {
-            if(error) throw errror;
-            res.json({
-                'message': 'Success',
-                'data': result
-            });
+    const title = req.query.title;
+    var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
+    
+    Users.findAll({ 
+        include: [
+            {
+                model: Roles,
+                as: "userRoles"
+            },
+        ],
+        where: condition 
+    })
+    .then(data => {
+        res.json({
+            "message":"Success",
+            "data":data
+        });
+    })
+    .catch(err => {
+        res.status(500).send({
+        message:
+            err.message || "Error someting"
         });
     });
+
 }
 
 exports.storeUser = (req, res) => {

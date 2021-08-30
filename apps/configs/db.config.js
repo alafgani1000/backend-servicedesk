@@ -20,7 +20,14 @@ db.requests = require('../models/Request');
 db.requestAttachments = require('../models/RequestAttachment');
 db.stages = require('../models/Stage');
 db.users = require('../models/User');
+db.roles = require('../models/Role');
 
+// user
+db.roles.hasMany(db.users, {as:"rolesUsers", foreignKey:"level"});
+db.users.belongsTo(db.roles, {
+  foreignKey: "level",
+  as:"userRole"
+})
 // incident
 db.incidents.hasMany(db.incidentAttachments, { as:"incidentAttachments" });
 db.incidentAttachments.belongsTo(db.incidents, {
