@@ -36,7 +36,7 @@ exports.getUsers = (req, res) => {
         include: [
             {
                 model: Roles,
-                as: "userRoles"
+                as: "userRole"
             },
         ],
         where: condition 
