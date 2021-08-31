@@ -5,39 +5,60 @@ const moment = require('moment');
 const dbconfig = require('../configs/db.config');
 const Users = dbconfig.users;
 const Roles = dbconfig.roles;
+const Teams = dbconfig.teams;
 
+/**
+ * get data user
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.getUser = (req, res) => {
-    let userId = req.params.id;
-    db.connect((err) => {
-        let getUserQuery = 'SELECT * FROM users WHERE id = ?';
-        db.query(getUserQuery,[userId], function(error, result, fields){
-            if(error) throw error;
-            if(result.length > 0){
-               res.json({
-                   'messaage':'Success',
-                   'data':result[0],
-               });
-               res.end();
-            }else{
-                res.json({
-                    'message':'Data not found'
-                });
-                res.end();
-            }
+    const userId = req.params.id;
+    Users.findOne({ where: {id:userId },
+        include: [
+            { 
+                model: Roles,
+                as: "userRole",
+            },
+            { 
+                model: Teams,
+                as: "userTeam",
+            },
+        ] 
+    })
+    .then(data => {
+        res.json({
+            "message":"Success",
+            "data":data
+        });
+    })
+    .catch(err => {
+        res.status(500).send({
+        message:
+            err.message || "Error someting"
         });
     });
 }
 
+/**
+ * get data user
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.getUsers = (req, res) => {
     const title = req.query.title;
     var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
-    
+    // get user
     Users.findAll({ 
         include: [
             {
                 model: Roles,
                 as: "userRole"
             },
+            {
+                model: Teams,
+                as: "userTeam"
+            }
         ],
         where: condition 
     })

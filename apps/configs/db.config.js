@@ -22,54 +22,66 @@ db.stages = require('../models/Stage');
 db.users = require('../models/User');
 db.roles = require('../models/Role');
 
-// user
+// user role
 db.roles.hasMany(db.users, {as:"rolesUsers", foreignKey:"level"});
 db.users.belongsTo(db.roles, {
   foreignKey: "level",
   as:"userRole"
 })
-// incident
+// user team
+db.teams.hasMany(db.users, {as:"teamUsers", foreignKey:"groupuser"});
+db.users.belongsTo(db.teams, {
+  foreignKey: "groupuser",
+  as:"userTeam"
+})
+// incident attachment
 db.incidents.hasMany(db.incidentAttachments, { as:"incidentAttachments" });
 db.incidentAttachments.belongsTo(db.incidents, {
   foreignKey: "incidentId",
   as: "incidents"
 });
+// stage incidents
 db.stages.hasMany(db.incidents, { as:"incidentStages"});
 db.incidents.belongsTo(db.stages, {
   foreignKey: "stageId",
   as: "stageIncidents"
 });
+// user incident
 db.users.hasMany(db.incidents, { as:"incidentUsers" });
 db.incidents.belongsTo(db.users, {
   foreignKey: "userId",
   as: "userIncidents"
 })
+// team incident
 db.teams.hasMany(db.incidents, { as:"incidentTeams" });
 db.incidents.belongsTo(db.teams, {
   foreignKey: "teamId",
   as: "teamIncidents"
 });
+// user incident teknisi
 db.incidents.belongsTo(db.users, {
   foreignKey: "user_technician",
   as: "technicianIncident"
 })
+// kategori incident
 db.categories.hasMany(db.incidents, { as:"incidentCategories" });
 db.incidents.belongsTo(db.categories, {
   foreignKey: "categoryId",
   as: "categoryIncidents"
 })
-
-// request
+// request attachments
 db.requests.hasMany(db.requestAttachments, { as:"requestAttachments" });
 db.requestAttachments.belongsTo(db.requests, {
   foreignKey: "requestId",
   as: "request"
 });
+// stage request
 db.stages.hasMany(db.requests, { as:"requestStages" });
 db.requests.belongsTo(db.stages, {
   foreignKey: "stageId",
   as: "stagesRequests"
 });
+// user request
 db.users.hasMany(db.requests, { as:"requestUsers" });
 db.requests.belongsTo(db.users, {
   foreignKey: "userId",
