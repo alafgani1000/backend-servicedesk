@@ -132,8 +132,9 @@ exports.updateUserForAdmin = (req, res) => {
     let level = req.body.level;
     let group = req.body.groupuser;
     let password = req.body.password;
+    console.log(password);
     // if password not empty
-    if (password === '') {
+    if (password === undefined || password === '') {
         db.connect((err) => {
             let updateUserQuery = 'UPDATE users SET name = ?, email = ?, level = ?, groupuser = ?  WHERE id = ?';
             db.query(updateUserQuery,[name,email,level,group,userId],(error,result,fields) => {
