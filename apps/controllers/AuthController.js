@@ -39,7 +39,9 @@ exports.signIn = (req, res) => {
                     }
                     res.json({
                         'message':'Success',
-                        'token': token
+                        'token': token,
+                        'role':result[0].level,
+                        'group':result[0].groupuser
                     });
                     res.end();
                 }else{

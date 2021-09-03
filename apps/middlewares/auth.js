@@ -44,9 +44,9 @@ exports.isAuth = (req, res, next) => {
     }
 }
 
-/*
+/**
     middleware for checked role authorized 
-    parameter is role
+    @param  role
     combination with AuthHelper.role('admin')
     example: var.hashRole(AuthHelper.role('admin'))
 */
