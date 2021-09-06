@@ -1,56 +1,84 @@
 const db = require('../configs/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const dbconfig = require('../configs/db.config');
+const Users = dbconfig.users;
+const Roles = dbconfig.roles;
+const Teams = dbconfig.teams;
 require('dotenv').config();
 
-exports.signIn = (req, res) => {
-    var data;
-    let username = req.body.username;
-    let password = req.body.password;
-    // query select data
-    db.connect((err) => {
-        let queryUser = 'select * from users where username = ?'
-        db.query(queryUser, [username], (err,result,field) => {
-            if(err) throw err 
-            if(result.length === 0){
-                res.json({
-                    'data': result,
-                    'length': result.length,
-                    'messsage':'Not found'
-                });
-                res.end();
-            }else{
-                const checkSign = bcrypt.compareSync(password, result[0].password);
-                let playLoad = {
-                    id:result[0].username,
-                    role:result[0].level,
-                    group:result[0].groupuser
-                };
-                if(checkSign){
-                    let token = jwt.sign({
-                        playLoad
-                    }, process.env.SECRET_KEY);
-                    if(token){
-                        // update token
-                        let updateToken = 'UPDATE users SET token = ? WHERE id = ?';
-                        db.query(updateToken, [token, result[0].id], (err,result,field) => {
-                            if(err) throw err;
-                        });
-                    }
-                    res.json({
-                        'message':'Success',
-                        'token': token,
-                        'role':result[0].level,
-                        'group':result[0].groupuser
-                    });
-                    res.end();
-                }else{
-                    res.json({
-                        'message':'User or Password Not Valid'
-                    });
-                    res.end();
+/**
+ * login
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.signIn = async (req, res) => {
+    try{
+        var dataRole;
+        let username = req.body.username;
+        let password = req.body.password;
+        // get user
+        const user = await Users.findOne({ where: { username:username },
+            include: [
+                { 
+                    model: Roles,
+                    as: "userRole",
+                }, 
+                {
+                    model: Teams,
+                    as: "userTeam",
                 }
-            }   
+            ] 
+        })
+        .then(result => {
+            return result;
         });
-    })
+
+        // check user data
+        if(user !== null){
+            const checkSign = bcrypt.compareSync(password, user.password);
+            let playLoad = {
+                id:user.username,
+                role:user.level,
+                group:user.groupuser
+            };
+            if(checkSign){
+                let token = jwt.sign({
+                    playLoad
+                }, process.env.SECRET_KEY);
+                if(token){
+                    // update token
+                    const updateUser = await Users.update({
+                        token:token
+                    }, {
+                        where: {
+                            id:user.id
+                        }
+                    })
+                    .then(result => {
+                        return result
+                    })
+                  
+                }                       
+                res.json({
+                    'message':'Success',
+                    'token': token,
+                    'role':user.userRole.role,
+                    'group':user.userTeam.name,
+                    'name':user.name
+                });
+            }
+        }else{
+            res.status(401).json({
+                'data': user,
+                'length': user.length,
+                'messsage':'Not found'
+            });
+            res.end();
+        }
+    }catch(err){
+        res.status(500).json({
+            message: `Error occured: ${err}`,
+        });
+    }
 }
