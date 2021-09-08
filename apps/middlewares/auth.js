@@ -10,6 +10,8 @@ exports.isAuth = (req, res, next) => {
         const token = req.headers.token;
         let decoded = jwt.verify(token, process.env.SECRET_KEY);
         const username = decoded.playLoad.id;
+        const idrole = decoded.playLoad.idrole;
+        const role = decoded.playLoad.role;
         db.connect((err) => {
             let queryUser = 'select * from users where username = ?'
             db.query(queryUser, [username], (err,result,field) => {
@@ -22,7 +24,9 @@ exports.isAuth = (req, res, next) => {
                      res.end()
                 }else{
                     if(result[0].token === token){
-                        global.idLogin = result[0].id
+                        global.idLogin = result[0].id;
+                        global.GidRole = idrole;
+                        global.GRole = role;
                         next();
                     }else{
                         res.status(401).json({
@@ -55,7 +59,7 @@ exports.hashRole = (role) => {
         try{
             const token = req.headers.token;
             let decoded = jwt.verify(token, process.env.SECRET_KEY);
-            if(decoded.group === role){
+            if(decoded.idrole === role){
                 next();
             }else{
                 res.json({

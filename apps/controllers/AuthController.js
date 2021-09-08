@@ -39,8 +39,9 @@ exports.signIn = async (req, res) => {
             const checkSign = bcrypt.compareSync(password, user.password);
             let playLoad = {
                 id:user.username,
-                role:user.level,
-                group:user.groupuser
+                idrole:user.level,
+                group:user.groupuser,
+                role:user.userRole.role
             };
             if(checkSign){
                 let token = jwt.sign({
@@ -59,7 +60,10 @@ exports.signIn = async (req, res) => {
                         return result
                     })
                   
-                }                       
+                }   
+                global.GidRole = user.level
+                global.GRole = user.userRole.role
+                global.idLogin = user.id                    
                 res.json({
                     'message':'Success',
                     'token': token,
