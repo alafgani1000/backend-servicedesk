@@ -3,9 +3,14 @@ const sequelize = require('../configs/connection');
 
 const Incident = sequelize.define('incidents', {
     id: {
-        type: DataTypes.STRING,
+        type:DataTypes.STRING,
         allowNull:false,
         primaryKey:true
+    },
+    code: {
+        type: DataTypes.INTEGER,
+        autoIncrement:true,
+        unique:'compositeIndex'
     },
     text: {
         type:DataTypes.TEXT,
