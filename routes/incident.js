@@ -17,7 +17,6 @@ router.post('/create',
 );
 router.patch('/:id/ticket', [
         check('team_id').notEmpty(),
-        check('ticket').notEmpty(),
         check('category_id').notEmpty(),
         check('stage_id').notEmpty()
     ],
