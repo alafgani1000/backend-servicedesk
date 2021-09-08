@@ -10,7 +10,6 @@ const RequestAttachment = require('../apps/models/RequestAttachment');
 const Role = require('../apps/models/Role');
 const Stage = require('../apps/models/Stage');
 const User = require('../apps/models/User');
-const UserTeam = require('../apps/models/UserTeams');
 sequelize.sync();
 
 // Incident.sync();
@@ -23,6 +22,5 @@ sequelize.sync();
 // Role.sync();
 // Stage.sync();
 // User.sync();
-// UserTeam.sync();
 // DefaultRoleValue.role();
 
