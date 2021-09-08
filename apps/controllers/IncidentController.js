@@ -1,4 +1,4 @@
-const { Sequelize } = require('sequelize');
+const { Op } = require('sequelize');
 const multer = require('multer');
 const fs = require('fs');
 const sequelize = require('../configs/connection');
@@ -49,9 +49,14 @@ require('dotenv').config();
  * @param {*} res 
  */
 exports.viewIncidents = (req, res) => {
-    const title = req.query.title;
-    var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
-
+    var condition = null;
+    if(GRole == 'admin'){
+        condition = {
+            userId:GidRole
+        };
+    }else{
+        condition = null;
+    }
     Incidents.findAll({ 
             include: [
                 {
@@ -326,6 +331,25 @@ exports.updateIncident = (req, res) => {
 }
 
 /**
+ * membuat nomor ticket incident
+ * @param {incidentId}
+ * @return {ticket}
+ */
+const genNumberTicket = (code) => {
+    // create ticket number
+    const phrase = 'I';
+    var jumlahDigit = 7;
+    var codeString = `${code}`;
+    var jumlahIncidentId = codeString.length;
+    console.log(jumlahDigit - jumlahIncidentId);
+    var selisih = jumlahDigit - jumlahIncidentId;
+    var zeroCount = '0000000';
+    var jumlahNol = zeroCount.substr(1, selisih);
+    var ticket = phrase+jumlahNol+code;
+    return ticket;
+}
+
+/**
  * input ticket
  * @param {*} req 
  * @param {*} res 
@@ -345,10 +369,16 @@ exports.inputTikcet = async (req, res) => {
         }
         /*-- end validation --*/
          
+        // get data incident
+        const dataIncident = await Incidents.findOne({ where: { id:req.params.id } })
+        .then(result => {
+            return result;
+        })
+
         // initiate variable
         let incidentId = req.params.id;
         let teamId = req.body.team_id;
-        let ticket = req.body.ticket;
+        let ticket = genNumberTicket(dataIncident.code);
         let categoryId = req.body.category_id;
         let stageId = req.body.stage_id;
         let validation = [];
