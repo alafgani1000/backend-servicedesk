@@ -17,8 +17,6 @@ const Categories = dbconfig.categories;
 const Users = dbconfig.users;
 
 const storage = require('../middlewares/upload');
-const User = require('../models/User');
-const { format } = require('../configs/database');
 const { incidentAttachments } = require('../configs/db.config');
 const upload = multer({ 
     fileFilter: function (req, file, cb) {   
@@ -375,12 +373,18 @@ exports.inputTikcet = async (req, res) => {
             return result;
         })
 
+        // get data stage open
+        const openStage = await Stages.findOne({where: {text:'Open'}})
+        .then(result => {
+            return result;
+        })
+
         // initiate variable
         let incidentId = req.params.id;
         let teamId = req.body.team_id;
         let ticket = genNumberTicket(dataIncident.code);
         let categoryId = req.body.category_id;
-        let stageId = req.body.stage_id;
+        let stageId = openStage.id;
         let validation = [];
 
         // create message validation
