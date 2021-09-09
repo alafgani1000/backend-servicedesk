@@ -24,6 +24,9 @@ const stage = require('./routes/stage');
 const incident = require('./routes/incident')
 const request = require('./routes/request');
 
+// for socket io
+const dashboardData = require('./apps/controllers/DashboardController')
+
 app.use(index);
 app.use('/api/user',user);
 app.use('/api/auth',auth);
@@ -47,7 +50,9 @@ io.on('connection', (socket) => {
     });
 });
 const getApiAndEmit = socket => {
-    const response = new Date();
+    const response = dashboardData.dataIncident;
+    console.log(response)
+    // const response = new Date();
     socket.emit('FromAPI', response);
 };
 

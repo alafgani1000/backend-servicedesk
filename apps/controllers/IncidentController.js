@@ -386,7 +386,7 @@ exports.inputTikcet = async (req, res) => {
         let categoryId = req.body.category_id;
         let stageId = openStage.id;
         let validation = [];
-
+        let dataMessage = {}
         // create message validation
         let datateam;
         const validasi_team = { "team": 'Team tidak ditemukan' };
@@ -424,7 +424,7 @@ exports.inputTikcet = async (req, res) => {
             endDay = endDay.add(category.time_interval, 'hours');
             const edate = endDay.format('YYYY-MM-DD');
             const etime = endDay.format('HH:mm:ss');
-            Incidents.update({
+            const update = await Incidents.update({
                 teamId: teamId,
                 ticket: ticket,
                 categoryId: categoryId,
@@ -439,16 +439,32 @@ exports.inputTikcet = async (req, res) => {
                 }
             })
             .then(data => {
-                res.status(200).json({
-                    "message":"Success"
-                });
-                res.end();
+                dataMessage = {
+                    message:'Success',
+                }
             })
             .catch(err => {
+                return {
+                    message:'Error',
+                    data:err
+                }
+            });
+
+            if(dataMessage.message === 'Success'){
+                const dataUpdate = await Incidents.findOne({ where:{ id:incidentId } })
+                    .then(result => {
+                        return result
+                    })
+                res.status(200).json({
+                    "message":"Success",
+                    "data":dataUpdate
+                });
+                res.end();
+            }else if(dataMessage.message === 'Error'){
                 res.status(500).json({
                     message: `Error occured: ${err}`,
                 });
-            });
+            }
         }
     } catch(err) {
         res.status(500).json({
