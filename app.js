@@ -25,7 +25,10 @@ const incident = require('./routes/incident')
 const request = require('./routes/request');
 
 // for socket io
-const dashboardData = require('./apps/controllers/DashboardController')
+const { Op, Sequelize } = require('sequelize');
+const dbconfig = require('./apps/configs/db.config');
+const Incidents = dbconfig.incidents;
+const { countIncidentEmit } = require('./apps/controllers/DashboardController')
 
 app.use(index);
 app.use('/api/user',user);
@@ -43,18 +46,12 @@ io.on('connection', (socket) => {
     if(interval){
         clearInterval(interval);
     }
-    interval = setInterval(() => getApiAndEmit(socket),1000);
+    interval = setInterval(() => countIncidentEmit(socket),1000);
     socket.on('disconnect', () => {
         console.log('client disconnected');
         clearInterval(interval);
     });
 });
-const getApiAndEmit = socket => {
-    const response = dashboardData.dataIncident;
-    console.log(response)
-    // const response = new Date();
-    socket.emit('FromAPI', response);
-};
 
 
 httpServer.listen(port, () => console.log(`listening on port ${port}`));
