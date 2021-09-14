@@ -25,10 +25,8 @@ const incident = require('./routes/incident')
 const request = require('./routes/request');
 
 // for socket io
-const { Op, Sequelize } = require('sequelize');
-const dbconfig = require('./apps/configs/db.config');
-const Incidents = dbconfig.incidents;
 const { countIncidentEmit } = require('./apps/controllers/DashboardController')
+const { countNewIncident } =  require('./apps/controllers/NotificationController')
 
 app.use(index);
 app.use('/api/user',user);
@@ -46,7 +44,12 @@ io.on('connection', (socket) => {
     if(interval){
         clearInterval(interval);
     }
-    interval = setInterval(() => countIncidentEmit(socket),1000);
+    interval = setInterval(() => 
+    countIncidentEmit(socket),
+    1000);
+    interval = setInterval(() => 
+    countNewIncident(socket),
+    1000);
     socket.on('disconnect', () => {
         console.log('client disconnected');
         clearInterval(interval);

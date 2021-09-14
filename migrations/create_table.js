@@ -10,9 +10,9 @@ const RequestAttachment = require('../apps/models/RequestAttachment');
 const Role = require('../apps/models/Role');
 const Stage = require('../apps/models/Stage');
 const User = require('../apps/models/User');
-// sequelize.sync();
+sequelize.sync();
 
-Incident.sync();
+// Incident.sync();
 // IncidentAattachments.sync();
 // Category.sync();
 // Menu.sync();
