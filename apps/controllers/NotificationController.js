@@ -21,4 +21,8 @@ exports.countNewIncident = async socket => {
     });
 
     socket.emit('countNewIncident', countNewIncident);
-};
+}
+
+exports.dataServer = async socket => {
+    socket.emit('dataServer', 'Test data server');
+}

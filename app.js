@@ -26,7 +26,7 @@ const request = require('./routes/request');
 
 // for socket io
 const { countIncidentEmit } = require('./apps/controllers/DashboardController')
-const { countNewIncident } =  require('./apps/controllers/NotificationController')
+const { countNewIncident, dataServer } =  require('./apps/controllers/NotificationController')
 
 app.use(index);
 app.use('/api/user',user);
@@ -41,18 +41,23 @@ app.use('/api/request',request);
 let interval;
 io.on('connection', (socket) => {
     console.log('new client connected');
-    if(interval){
-        clearInterval(interval);
-    }
-    interval = setInterval(() => 
-    countIncidentEmit(socket),
-    1000);
-    interval = setInterval(() => 
-    countNewIncident(socket),
-    1000);
+    // if(interval){
+    //     clearInterval(interval);
+    // }
+    // interval = setInterval(() => 
+    // countIncidentEmit(socket),
+    // 1000);
+    // interval = setInterval(() => 
+    // countNewIncident(socket),
+    // 1000);
+
+    const data = socket.on('messageData', data => {
+      io.emit('messageData', data)
+    })
+    
     socket.on('disconnect', () => {
         console.log('client disconnected');
-        clearInterval(interval);
+        // clearInterval(interval);
     });
 });
 
