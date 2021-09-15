@@ -8,7 +8,6 @@ const { validationResult } = require('express-validator');
 const db = require('../configs/database');
 
 const dbconfig = require('../configs/db.config');
-const { request } = require('http');
 const Incidents = dbconfig.incidents;
 const IncidentAttachments = dbconfig.incidentAttachments;
 const Stages = dbconfig.stages;
@@ -220,7 +219,10 @@ exports.createIncident = (req, res) => {
                 })
                 .then(data => {
                     // if data inserted
-                    res.json({"message":"Success"});
+                    res.status(200).json({
+                        "message":"Success",
+                        "data":idIndicent
+                    });
                     res.end();
                 })
                 .catch(err => {
@@ -453,11 +455,17 @@ exports.inputTikcet = async (req, res) => {
             if(dataMessage.message === 'Success'){
                 const dataUpdate = await Incidents.findOne({ where:{ id:incidentId } })
                     .then(result => {
-                        return result
+                        return result;
+                    })
+                // data admin
+                const dataAdmin = await Users.findOne({ where: { id:1 }})
+                    .then(result => {
+                        return result;
                     })
                 res.status(200).json({
                     "message":"Success",
-                    "data":dataUpdate
+                    "data":dataUpdate,
+                    "dataToken":dataAdmin
                 });
                 res.end();
             }else if(dataMessage.message === 'Error'){

@@ -25,8 +25,15 @@ const incident = require('./routes/incident')
 const request = require('./routes/request');
 
 // for socket io
-const { countIncidentEmit } = require('./apps/controllers/DashboardController')
-const { countNewIncident, dataServer } =  require('./apps/controllers/NotificationController')
+const dbconfig = require('./apps/configs/db.config');
+const Incidents = dbconfig.incidents;
+const IncidentAttachments = dbconfig.incidentAttachments;
+const Stages = dbconfig.stages;
+const Teams = dbconfig.teams;
+const Categories = dbconfig.categories;
+const Users = dbconfig.users;
+const { countIncidentEmit } = require('./apps/controllers/DashboardController');
+const { countNewIncident, dataServer } =  require('./apps/controllers/NotificationController');
 
 app.use(index);
 app.use('/api/user',user);
@@ -53,6 +60,26 @@ io.on('connection', (socket) => {
 
     const data = socket.on('messageData', data => {
       io.emit('messageData', data)
+    })
+
+    const notifNewIncident = socket.on('userSet', data => {
+      const newIncident = Incidents.findOne({ where:{id:data.data},
+        include: [
+          { 
+              model: Stages,
+              as: "stageIncidents",
+              attributes:["id","text","description"]
+          },
+          {
+              model: Users,
+              as: "userIncidents",
+              attributes:["id","name"]
+          }
+        ]
+      })
+      .then($result => {
+        return $result
+      })
     })
     
     socket.on('disconnect', () => {
