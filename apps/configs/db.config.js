@@ -21,6 +21,9 @@ db.requestAttachments = require('../models/RequestAttachment');
 db.stages = require('../models/Stage');
 db.users = require('../models/User');
 db.roles = require('../models/Role');
+db.notifications = require('../models/Notification');
+db.actions = require('../models/Action');
+db.incidentActions = require('../models/IncidentAction');
 
 // user role
 db.roles.hasMany(db.users, {as:"rolesUsers", foreignKey:"level"});
@@ -87,4 +90,6 @@ db.requests.belongsTo(db.users, {
   foreignKey: "userId",
   as: "userRequests"
 })
+
+
 module.exports = db;

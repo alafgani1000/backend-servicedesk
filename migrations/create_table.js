@@ -10,8 +10,15 @@ const RequestAttachment = require('../apps/models/RequestAttachment');
 const Role = require('../apps/models/Role');
 const Stage = require('../apps/models/Stage');
 const User = require('../apps/models/User');
-sequelize.sync();
+const Action = require('../apps/models/Action');
+const Notification = require('../apps/models/Notification');
+const IncidentAction = require('../apps/models/IncidentAction');
 
+// sequelize.sync();
+
+Action.sync();
+Notification.sync();
+IncidentAction.sync();
 // Incident.sync();
 // IncidentAattachments.sync();
 // Category.sync();
@@ -23,4 +30,5 @@ sequelize.sync();
 // Stage.sync();
 // User.sync();
 // DefaultRoleValue.role();
+
 

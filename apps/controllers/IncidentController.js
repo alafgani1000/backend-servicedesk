@@ -14,6 +14,7 @@ const Stages = dbconfig.stages;
 const Teams = dbconfig.teams;
 const Categories = dbconfig.categories;
 const Users = dbconfig.users;
+const Notifications = dbconfig.notifications;
 
 const storage = require('../middlewares/upload');
 const { incidentAttachments } = require('../configs/db.config');
@@ -47,12 +48,12 @@ require('dotenv').config();
  */
 exports.viewIncidents = (req, res) => {
     var condition = null;
-    if(GRole == 'admin'){
-        condition = {
-            userId:GidRole
-        };
+    if(GRole === 'admin'){
+        condition = null
     }else{
-        condition = null;
+        condition = {
+            userId:idLogin
+        };
     }
     Incidents.findAll({ 
             include: [
@@ -170,7 +171,7 @@ exports.viewIncident = (req, res) => {
  */
 exports.createIncident = (req, res) => {
     try {        
-        upload(req, res, (err) => {            
+        upload(req, res, async (err) => {            
             if(err instanceof multer.MulterError) {
                 res.json({message:err})
             }else{
@@ -182,6 +183,7 @@ exports.createIncident = (req, res) => {
                 let stage_id = req.body.stage_id;
                 let createdAt = moment().format("YYYY-MM-DD HH:mm:ss");
                 let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let dataMessage = {};
                 
                 // get data file uploads
                 let files = req.files;
@@ -198,8 +200,9 @@ exports.createIncident = (req, res) => {
                 });
                 // unique id with uuid
                 let idIndicent = uuidv4(); 
+                let idNotif = uuidv4();
                 // insert data
-                Incidents.create({
+                const insert = await Incidents.create({
                     id:idIndicent,
                     text:text,
                     location:location,
@@ -219,19 +222,80 @@ exports.createIncident = (req, res) => {
                 })
                 .then(data => {
                     // if data inserted
-                    res.status(200).json({
-                        "message":"Success",
-                        "data":idIndicent
-                    });
-                    res.end();
+                    // res.status(200).json({
+                    //     "message":"Success",
+                    //     "data":idIndicent
+                    // });
+                    // res.end();
+                    dataMessage = {
+                        "message":"success"
+                    }
                 })
                 .catch(err => {
                     // if error
-                    res.status(500).send({
-                    message:
-                        err.message || "Error someting"
-                    });
+                    // res.status(500).send({
+                    // message:
+                    //     err.message || "Error someting"
+                    // });
+                    dataMessage = {
+                        "message":"error",
+                        "data":err
+                    }
                 });   
+                // if success create
+                if(dataMessage.message === "success"){
+                    const dinc = await Incidents.findOne({ where:{ id:idIndicent },
+                        include: 
+                        [
+                            { 
+                                model: Stages,
+                                as: "stageIncidents",
+                                attributes:["id","text","description"]
+                            },
+                            {
+                                model: Users,
+                                as: "userIncidents",
+                                attributes:["id","name"]
+                            }
+                        ]
+                    })
+                    .then(result => {
+                        return result
+                    })
+                    if(dinc !== null){
+                        // get admin user
+                        const admin = await Users.findOne({ where:{level:1} })
+                        .then(result => {
+                            return result;
+                        })
+                        // insert to table notification
+                        const insertNotif = await Notifications.create({
+                            id:idNotif,
+                            tableName:"incidents",
+                            idData:dinc.id,
+                            data:dinc.text,
+                            from:dinc.userIncidents.name,
+                            to:admin.id,
+                            stage:dinc.stageIncidents.text,
+                            status:0,
+                            createdAt:createdAt,
+                        })
+                        .then(result => {
+                            return result;
+                        })
+                        .catch(error => {
+                            return error;
+                        });
+                    }
+                    return res.status(200).json({
+                        "message":"Success",
+                        "data":idNotif
+                    })
+                }else if(dataMessage.message === "error"){
+                    return res.status(500).json({
+                        "message": err.message || "Error someting"
+                    })
+                }
             }
         })      
        
@@ -470,7 +534,7 @@ exports.inputTikcet = async (req, res) => {
                 res.end();
             }else if(dataMessage.message === 'Error'){
                 res.status(500).json({
-                    message: `Error occured: ${err}`,
+                    message: `Error occured: ${dataMessage.err}`,
                 });
             }
         }

@@ -31,6 +31,7 @@ const IncidentAttachments = dbconfig.incidentAttachments;
 const Stages = dbconfig.stages;
 const Teams = dbconfig.teams;
 const Categories = dbconfig.categories;
+const Notifications = dbconfig.notifications;
 const Users = dbconfig.users;
 const { countIncidentEmit } = require('./apps/controllers/DashboardController');
 const { countNewIncident, dataServer } =  require('./apps/controllers/NotificationController');
@@ -58,33 +59,38 @@ io.on('connection', (socket) => {
     // countNewIncident(socket),
     // 1000);
 
-    const data = socket.on('messageData', data => {
-      io.emit('messageData', data)
-    })
-
-    const notifNewIncident = socket.on('userSet', data => {
-      const newIncident = Incidents.findOne({ where:{id:data.data},
-        include: [
-          { 
-              model: Stages,
-              as: "stageIncidents",
-              attributes:["id","text","description"]
-          },
-          {
-              model: Users,
-              as: "userIncidents",
-              attributes:["id","name"]
-          }
-        ]
+    /**
+     * notifikasi ada incident/problem baru
+     * emit new newIncident frim client
+     */
+    socket.on('newIncident', async data => {
+      // get new incident
+      const newIncNotif = await Notifications.findOne({ where:{id:data} })
+      .then(result => {
+        return result;
       })
-      .then($result => {
-        return $result
+      // get user admin
+      const adminUser = await Users.findOne({ where:{id:newIncNotif.to} })
+      .then(result => {
+        return result
+      })
+      // get notifications
+      const notificationsData = await Notifications.findAll({ 
+        where:{
+          to:newIncNotif.to,
+          stage:'New'
+        } 
+      })
+      // io emit to admin for new incident or problem
+      console.log(notificationsData);
+      io.emit(adminUser.token, {
+        "notifications":notificationsData
       })
     })
     
     socket.on('disconnect', () => {
-        console.log('client disconnected');
-        // clearInterval(interval);
+      console.log('client disconnected');
+      // clearInterval(interval)
     });
 });
 
