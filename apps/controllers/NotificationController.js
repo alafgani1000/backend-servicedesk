@@ -12,12 +12,40 @@ const Notifications = dbconfig.notifications;
 
 exports.incidentNotifications = async (req, res) => {
     try {
+        let messageData = {
+            message:'',
+            data:''
+        }
         const notifications = await Notifications.findAll({ 
             where:{
                 tableName:'incidents',
-                status:0
+                status:0,
+                to:idLogin
             }
         })
+        .then(result => {
+            messageData = {
+                message:'success',
+                data:result
+            }
+        })
+        .catch(error => {
+            messageData = {
+                message:'error',
+                data:error
+            }
+        })
+        if(messageData.message === 'success'){
+            res.status(200).json({
+                message:'Success',
+                data:messageData.data
+            })
+        }else if(messageData.message === 'error'){
+            res.status(500).json({
+                message:'Error',
+                data:messageData.data
+            })
+        }        
     } catch(error) {
         res.status(500).json({
             message:error

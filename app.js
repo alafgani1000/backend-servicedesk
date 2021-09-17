@@ -23,6 +23,7 @@ const category = require('./routes/category');
 const stage = require('./routes/stage');
 const incident = require('./routes/incident')
 const request = require('./routes/request');
+const notifications = require('./routes/notification');
 
 // for socket io
 const dbconfig = require('./apps/configs/db.config');
@@ -45,6 +46,7 @@ app.use('/api/category',category);
 app.use('/api/stage',stage);
 app.use('/api/incident',incident);
 app.use('/api/request',request);
+app.use('/api/notifications',notifications);
 
 let interval;
 io.on('connection', (socket) => {
@@ -82,7 +84,6 @@ io.on('connection', (socket) => {
         } 
       })
       // io emit to admin for new incident or problem
-      console.log(notificationsData);
       io.emit(adminUser.token, {
         "notifications":notificationsData
       })
