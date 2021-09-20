@@ -268,12 +268,15 @@ exports.createIncident = (req, res) => {
                         .then(result => {
                             return result;
                         })
+                        const dataNotif = {
+                            "text":dinc.text
+                        }
                         // insert to table notification
                         const insertNotif = await Notifications.create({
                             id:idNotif,
                             tableName:"incidents",
                             idData:dinc.id,
-                            data:dinc.text,
+                            data:JSON.stringify(dataNotif),
                             from:dinc.userIncidents.name,
                             to:admin.id,
                             stage:dinc.stageIncidents.text,
