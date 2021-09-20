@@ -4,17 +4,21 @@ const Team = require('../models/Team');
 const Stage = require('../models/Stage');
 
 let role = () => {
-    Role.create(
-        {
-            role: 'admin'
-        }
-    )
-    .catch(err => {
-        res.status(500).send({
-        message:
-            err.message || "Error someting"
-        });
-    });    
+    Role.create({
+        role: 'admin'
+    })
+
+    Role.create({
+        role: 'developer'
+    })
+
+    Role.create({
+        role: 'technician'
+    })
+
+    Role.create({
+        role: 'guest'
+    })
 } 
 
 let team = () => {
@@ -33,6 +37,10 @@ let team = () => {
     Team.create({
         name: 'ADMIN'
     });
+
+    TEAM.create({
+        name: 'GUEST'
+    })
 
 }
 
