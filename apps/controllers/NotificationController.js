@@ -55,7 +55,7 @@ exports.incidentNotifications = async (req, res) => {
 
 exports.readNotification = async (req, res) => {
     try {
-        const idNotif = param.id;
+        const idNotif = req.params.id;
         let dataMessage = {
             "message":"",
             "data":""
