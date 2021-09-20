@@ -52,3 +52,47 @@ exports.incidentNotifications = async (req, res) => {
         });
     }
 }
+
+exports.readNotification = async (req, res) => {
+    try {
+        const idNotif = param.id;
+        let dataMessage = {
+            "message":"",
+            "data":""
+        }
+        const notification = await Notifications.update({
+            status:1
+        },{
+            where:{
+                id:idNotif
+            }
+        })
+        .then(result => {
+            dataMessage = {
+                "message":"success",
+                "data":result
+            }
+        })
+        .catch(error => {
+            dataMessage = {
+                "message":"error",
+                "data":error
+            }
+        })
+
+        if(dataMessage.message === 'success'){
+            res.status(200).json({
+                "message":"Success"
+            })
+        }else if(dataMessage === 'error'){
+            res.json(500).json({
+                "message":"Error " + dataMessage.error
+            })
+        }
+    } catch(err) {
+        res.status(500).json({
+            "message":"Error " + err 
+        })
+    }
+
+}

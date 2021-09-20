@@ -6,5 +6,6 @@ const AuthHelp = require('../apps/helpers/AuthHelper');
 const { check } = require('express-validator');
 
 router.get('/incidents', auth.isAuth, NotificationController.incidentNotifications);
+router.patch('/read', auth.isAuth, NotificationController.readNotification);
 
 module.exports = router
