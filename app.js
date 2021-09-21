@@ -80,11 +80,66 @@ io.on('connection', (socket) => {
       const notificationsData = await Notifications.findAll({ 
         where:{
           to:newIncNotif.to,
-          stage:'New'
+          status:0
         } 
       })
       // io emit to admin for new incident or problem
       io.emit(adminUser.token, {
+        "notifications":notificationsData
+      })
+    })
+
+    socket.on('inputTicket', async data => {
+      // get data notification
+      const notif = await Notifications.findOne({ where:{id:data} })
+        .then(result => {
+          return result;
+        })
+      // get data user
+      const user = await Users.findOne({ where: {id:notif.to} })
+        .then(result => {
+          return result;
+        })
+      // get data notifications
+      const notificationsData = await Notifications.findAll({
+        where: {
+          to:notif.to,
+          status:0
+        }
+      })
+      .then(result => {
+        return result;
+      })
+
+      io.emit(user.token, {
+        "notifications":notificationsData
+      })
+      
+    })
+
+    socket.on('resolveIncident', async data => {
+      // get data notification
+      const notif = await Notifications.findOne({ where:{id:data} })
+        .then(result => {
+          return result;
+        })
+      // get data user
+      const user =  await Users.findOne({ where: {id:notif.to} })
+        .then(result => {
+          return result;
+        })
+      // get data notification
+      const notificationsData = await Notifications.findAll({
+        where: {
+          to:notif.to,
+          status:0
+        }
+      })
+      .then(result => {
+        return result;
+      })
+
+      io.emit(user.token, {
         "notifications":notificationsData
       })
     })

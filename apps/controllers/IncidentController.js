@@ -46,16 +46,24 @@ require('dotenv').config();
  * @param {*} req 
  * @param {*} res 
  */
-exports.viewIncidents = (req, res) => {
+exports.viewIncidents = async (req, res) => {
     var condition = null;
     if(GRole === 'admin'){
         condition = null
+    }else if(GRole === "technician"){
+        const user = await Users.findOne({ where: {id:idLogin} })
+            .then(result => {
+                return result;
+            })
+        condition = {
+            teamId:user.groupuser
+        }
     }else{
         condition = {
             userId:idLogin
         };
     }
-    Incidents.findAll({ 
+    await Incidents.findAll({ 
             include: [
                 {
                     model: IncidentAttachments,
@@ -456,6 +464,7 @@ exports.inputTikcet = async (req, res) => {
         let stageId = openStage.id;
         let validation = [];
         let dataMessage = {}
+        let createdAt = moment().format("YYYY-MM-DD HH:mm:ss");
         // create message validation
         let datateam;
         const validasi_team = { "team": 'Team tidak ditemukan' };
@@ -520,19 +529,43 @@ exports.inputTikcet = async (req, res) => {
             });
 
             if(dataMessage.message === 'Success'){
+                const notifId = uuidv4();
+                // get data incident 
                 const dataUpdate = await Incidents.findOne({ where:{ id:incidentId } })
                     .then(result => {
                         return result;
                     })
-                // data admin
-                const dataAdmin = await Users.findOne({ where: { id:1 }})
+                // data user
+                const userIncident = await Users.findOne({ where: { id:dataUpdate.userId }})
                     .then(result => {
                         return result;
                     })
+                // data pengirim
+                const fromUser =  await Users.findOne({ where: { level:1 }})
+                    .then(result => {
+                        return result;
+                    })
+                // insert notification
+                const dataNotif = {
+                    text:dataUpdate.text,
+                    ticket:dataUpdate.ticket,
+                }
+                const insertNotif = await Notifications.create({
+                    id:notifId,
+                    tableName:"incidents",
+                    from:fromUser.name,
+                    to:userIncident.id,
+                    idData:dataUpdate.id,
+                    data:JSON.stringify(dataNotif),
+                    stage:stageId,
+                    status:0,
+                    createdAt:createdAt
+                })
+
                 res.status(200).json({
                     "message":"Success",
-                    "data":dataUpdate,
-                    "dataToken":dataAdmin
+                    "notifId":notifId,
+                    "data":dataUpdate
                 });
                 res.end();
             }else if(dataMessage.message === 'Error'){
@@ -553,40 +586,103 @@ exports.inputTikcet = async (req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-exports.resolve = (req, res) => {
+exports.resolve = async (req, res) => {
     try {
         // initiate variable
         let incidentId = req.params.id;
         let resolveText = req.body.resolve_text;
         let dateNow = moment();
+        let createdAt = dateNow.format("YYYY-MM-DD HH:mm:ss");
         let resolveDate = dateNow.format('YYYY-MM-DD');
         let resolveTime = dateNow.format('HH:mm:ss');
-        let teknisi = req.body.teknisi;
-        let stageId = req.body.stage_id;
+        let teknisi = idLogin;
+        let messageData = {
+            message:"",
+            data:""
+        }
+
+        // get stage resolve
+        const stageResolve = await Stages.findOne({ where:{text:'Resolve'} })
+            .then(result => {
+                return result;
+            })
 
         // update data
-        Incidents.update({
+        const resolveIncident = await Incidents.update({
            resolve_text:resolveText,
            resolve_date:resolveDate,
            resolve_time:resolveTime,
            user_technician:teknisi,
-           stageId:stageId
+           stageId:stageResolve.id
         }, {
             where: {
                 id:incidentId
             }
         })
         .then(data => {
-            res.status(200).json({
-                "message":"Resolved"
-            });
-            res.end();
+            // res.status(200).json({
+            //     "message":"Resolved"
+            // });
+            // res.end();
+            messageData = {
+                message:"resolved"
+            }
         })
         .catch(err => {
-            res.status(500).json({
-                message: `Error occured: ${err}`,
-            });
+            // res.status(500).json({
+            //     message: `Error occured: ${err}`,
+            // });
+            messageData = {
+                message:"error",
+                data:err
+            }
         });
+        
+        // check message
+        if(messageData.message === "resolved"){
+            const notifId = uuidv4();
+            // get data incident
+            const dataInc = await Incidents.findOne({ where:{id:incidentId} })
+                .then(result => {
+                    return result;
+                })
+            // get from
+            const fromUser = await Users.findOne({ where:{id:idLogin} })
+                .then(result => {
+                    return result;
+                })
+            // get to
+            const toUser = await Users.findOne({ whre:{id:dataInc.userId} })
+                .then(result => {
+                    return result;
+                })
+            // create notif
+            const dataNotif = {
+                "text":dataInc.text
+            }
+            const insertNotif = await Notifications.create({
+                id:notifId,
+                tableName:'incidents',
+                from:fromUser.name,
+                to:dataInc.userId,
+                idData:dataInc.id,
+                data:JSON.stringify(dataNotif),
+                stage:stageResolve.text,
+                status:0,
+                createdAt:createdAt
+            });
+            
+            res.status(200).json({
+                "message":"Resolved",
+                "notifId":notifId
+            });
+            res.end();
+        }else{
+            res.status(500).json({
+                "message": `Error occured data: ${messageData.data}`,
+            });
+            res.end();
+        }
     } catch(err) {
         res.status(500).json({
             message: `Error occured: ${err}`,
