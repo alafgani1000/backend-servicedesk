@@ -716,9 +716,13 @@ exports.close = async (req, res) => {
         const startDate = moment(sdate+' '+stime);
         const resolveDate = moment(rdate+' '+rtime);
         var intervalTime = resolveDate.diff(startDate, 'minutes');
+        let messageData = {
+            "message":"",
+            "data":""
+        }
 
         // update data
-        Incidents.update({
+        $close = await Incidents.update({
            stageId:stageId,
            interval_resolve:intervalTime,
            close_date:date,
@@ -729,16 +733,49 @@ exports.close = async (req, res) => {
             }
         })
         .then(data => {
-            res.status(200).json({
-                "message":"Close"
-            });
-            res.end();
+            // res.status(200).json({
+            //     "message":"Close"
+            // });
+            // res.end();
+            messageData = {
+                "message":"success",
+                "data":data
+            }
         })
         .catch(err => {
-            res.status(500).json({
-                message: `Error occured: ${err}`,
-            });
+            // res.status(500).json({
+            //     message: `Error occured: ${err}`,
+            // });
+            messageData = {
+                "message":"error",
+                "data":error
+            }
         });
+        if(messageData.message === "success"){
+            const dataInc = await Incidents.findOne({ where: {id:incidentId} })
+            .then(result => {
+                return resut
+            })
+            const userId = dataInc.userId
+            const userTechnic = dataInc.user_technician
+            // get data users
+            const userTo = await Users.findAll({
+                where: {
+                    [Op.in]:[userId,userTechnic]
+                }
+            })
+            .then(result => {
+                return result
+            })
+            userTo.forEach((item, index) => {
+                const notifId = uuidv4()
+                Notifications.create({
+                    id:notifId
+                })
+            })
+        }else if(messageData.message === "error"){
+
+        }
     } catch(err) {
         res.status(500).json({
             message: `Error occured: ${err}`,
