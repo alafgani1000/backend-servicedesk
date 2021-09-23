@@ -90,7 +90,7 @@ exports.viewIncidents = async (req, res) => {
                 {
                     model: Categories,
                     as: "categoryIncidents",
-                    attributes: ["id","name"]
+                    attributes: ["id","name","time_interval"]
                 }
             ],
             where: condition 
@@ -146,7 +146,7 @@ exports.viewIncident = (req, res) => {
                 {
                     model: Categories,
                     as: "categoryIncidents",
-                    attributes: ["id","name"]
+                    attributes: ["id","name","time_interval"]
                 }
             ] 
         })
@@ -705,6 +705,11 @@ exports.close = async (req, res) => {
         .then(result => {
             return result;
         });
+
+        const stageOpen = await Stages.findOne({ where:{text:'Close'} })
+        .then(result => {
+            return result;
+        })
         
         const dateNow = moment();
         const date = dateNow.format('YYYY-MM-DD');
@@ -720,10 +725,11 @@ exports.close = async (req, res) => {
             "message":"",
             "data":""
         }
+        let notifIds = []
 
         // update data
         $close = await Incidents.update({
-           stageId:stageId,
+           stageId:stageOpen.id,
            interval_resolve:intervalTime,
            close_date:date,
            close_time:time
@@ -752,34 +758,73 @@ exports.close = async (req, res) => {
             }
         });
         if(messageData.message === "success"){
-            const dataInc = await Incidents.findOne({ where: {id:incidentId} })
+            const dataInc = await Incidents.findOne({ 
+                where: {id:incidentId},
+                include:[
+                    { 
+                        model: Stages,
+                        as: "stageIncidents" 
+                    }
+                ]
+            })
             .then(result => {
-                return resut
+                return result
             })
             const userId = dataInc.userId
             const userTechnic = dataInc.user_technician
+
             // get data users
             const userTo = await Users.findAll({
                 where: {
-                    [Op.in]:[userId,userTechnic]
+                    id:{
+                        [Op.in]:[userId,userTechnic]
+                    }
                 }
             })
             .then(result => {
                 return result
             })
+
+            // get data from
+            const userFrom = await Users.findOne({ where:{id:idLogin} })
+            .then(result => {
+                return result
+            })
+
+            const dataNotif = {
+                "text":dataInc.text
+            }
             userTo.forEach((item, index) => {
+                console.log(item.id)
                 const notifId = uuidv4()
+                notifIds.push(notifId)
                 Notifications.create({
-                    id:notifId
+                    id:notifId,
+                    tableName:'incidents',
+                    from:userFrom.name,
+                    to:item.id,
+                    idData:dataInc.id,
+                    data:JSON.stringify(dataNotif),
+                    stage:dataInc.stageIncidents.text,
+                    status:0
                 })
             })
+            res.status(200).json({
+                "message":"Success",
+                "datas":notifIds
+            });
+            res.end();
         }else if(messageData.message === "error"){
-
+            res.status(500).json({
+                "message": `Error occured: ${messageData.error}`,
+            });
+            res.end();
         }
     } catch(err) {
         res.status(500).json({
             message: `Error occured: ${err}`,
         });
+        res.end();
     }
 }
 

@@ -110,13 +110,14 @@ io.on('connection', (socket) => {
       .then(result => {
         return result;
       })
-
+      // emit notifications
       io.emit(user.token, {
         "notifications":notificationsData
       })
       
     })
 
+    // handle notification resolve incident
     socket.on('resolveIncident', async data => {
       // get data notification
       const notif = await Notifications.findOne({ where:{id:data} })
@@ -128,7 +129,7 @@ io.on('connection', (socket) => {
         .then(result => {
           return result;
         })
-      // get data notification
+      // get data notifications
       const notificationsData = await Notifications.findAll({
         where: {
           to:notif.to,
@@ -138,10 +139,40 @@ io.on('connection', (socket) => {
       .then(result => {
         return result;
       })
-
+      // emit notification
       io.emit(user.token, {
         "notifications":notificationsData
       })
+    })
+
+    // handle notification close incident
+    socket.on('closeIncident', async data => {
+       data.forEach( async (item, index) => {
+        // get data 
+        const notif = await Notifications.findOne({ where:{id:item} })
+        .then(result => {
+          return result;
+        })
+        // get data user
+        const user = await Users.findOne({ where:{id:notif.to} })
+        .then(result => {
+          return result;
+        })
+        // get notifications
+        const notificationsData = await Notifications.findAll({
+          where:{
+            to:notif.to,
+            status:0
+          }
+        })
+        .then(result => {
+          return result;
+        })
+        // emit notifications
+        io.emit(user.token, {
+          "notifications":notificationsData
+        })
+      });
     })
     
     socket.on('disconnect', () => {
