@@ -16,16 +16,16 @@ const IncidentAction = require('../apps/models/IncidentAction');
 
 // sequelize.sync();
 
-Action.sync();
-Notification.sync();
-IncidentAction.sync();
+// Action.sync();
+// Notification.sync();
+// IncidentAction.sync();
 // Incident.sync();
 // IncidentAattachments.sync();
 // Category.sync();
 // Menu.sync();
 // MenuRole.sync();
 // Request.sync();
-// RequestAttachment.sync();
+RequestAttachment.sync();
 // Role.sync();
 // Stage.sync();
 // User.sync();

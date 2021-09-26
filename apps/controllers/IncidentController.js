@@ -416,7 +416,6 @@ const genNumberTicket = (code) => {
     var jumlahDigit = 7;
     var codeString = `${code}`;
     var jumlahIncidentId = codeString.length;
-    console.log(jumlahDigit - jumlahIncidentId);
     var selisih = jumlahDigit - jumlahIncidentId;
     var zeroCount = '0000000';
     var jumlahNol = zeroCount.substr(1, selisih);

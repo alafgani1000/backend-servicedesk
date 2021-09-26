@@ -9,10 +9,10 @@ const RequestAttachments = dbconfig.requestAttachments;
 const Stages = dbconfig.stages;
 const Teams = dbconfig.teams;
 const Categories = dbconfig.categories;
+const Notifications = dbconfig.notifications;
 const Users = dbconfig.users;
 
 const storage = require('../middlewares/upload');
-const { stages } = require('../configs/db.config');
 const User = require('../models/User');
 
 const upload = multer({ 
@@ -30,7 +30,7 @@ const upload = multer({
         }
         if(errorMessage.length > 0){
             cb(new multer.MulterError(errorMessage));
-        }else if(mimetype === "image/jpeg"){
+        }else if(mimetype === "image/jpeg" || mimetype === "image/png"){
             return cb(null,true);
         } else {
             cb(new multer.MulterError('extension not valid'));
@@ -133,7 +133,7 @@ exports.viewRequest = (req, res) => {
  * @param {*} res
  *  
  */
- exports.updateRequest = (req, res) => {
+ exports.updateRequest = async (req, res) => {
     // inisiasi variabel
     const requestId = req.params.id;
     const title = req.body.title;
@@ -144,7 +144,7 @@ exports.viewRequest = (req, res) => {
     const updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
     try{
         // update request
-        Requests.update({
+        const updateRequest = await Requests.update({
             title:title,
             business_need:businessNeed,
             business:businessValue,
@@ -158,17 +158,20 @@ exports.viewRequest = (req, res) => {
         })
         .then(data => {
             res.status(200).json({
+                "status":"success",
                 "message":"Request Updated"
             });
         })
         .catch(err => {
             res.status(500).json({
-                message:`Error occured: ${err}`
+                "status":"error",
+                "message":`Error occured: ${err}`
             })
         })
     } catch(err) {
         res.status(500).json({
-            message: `Error occured: ${err}`
+            "status":"error",
+            "message": `Error occured: ${err}`
         });
     }
 }
@@ -257,7 +260,7 @@ exports.viewRequest = (req, res) => {
  */
  exports.createRequest = (req, res) => {
     try {        
-        upload(req, res, (err) => {            
+        upload(req, res, async (err) => {            
             if(err instanceof multer.MulterError) {
                 res.json({message:err})
             }else{
@@ -265,12 +268,22 @@ exports.viewRequest = (req, res) => {
                 let title = req.body.title;
                 let business_need = req.body.business_need;
                 let business_value = req.body.business_value;
-                let user_id = req.body.user_id;
+                let user_id = idLogin;
                 let phone = req.body.phone;
                 let location = req.body.location;
-                let stage_id = req.body.stage_id;
                 let createdAt = moment().format("YYYY-MM-DD HH:mm:ss");
                 let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let messageData = {
+                    "message": "",
+                    "data": ""
+                }
+
+                // get stage new
+                const stageNew = await Stages.findOne({ where:{text:'New'} })
+                .then(result => {
+                    return result;
+                })
+                let stageId = stageNew.id
                 
                 // get data file uploads
                 let files = req.files;
@@ -287,7 +300,7 @@ exports.viewRequest = (req, res) => {
                 // unique id with uuid
                 let requestId = uuidv4(); 
                 // insert data
-                Requests.create({
+                const createRequest = await Requests.create({
                     id:requestId,
                     title:title,
                     business_need:business_need,
@@ -295,7 +308,7 @@ exports.viewRequest = (req, res) => {
                     location:location,
                     phone:phone,
                     userId:user_id,
-                    stageId:stage_id,
+                    stageId:stageId,
                     createdAt:createdAt,
                     updatedAt:updatedAt,
                     requestAttachments: fileUploads
@@ -309,16 +322,71 @@ exports.viewRequest = (req, res) => {
                 })
                 .then(data => {
                     // if data inserted
-                    res.json({"message":"Success"});
-                    res.end();
+                    // res.json({"message":"Success"});
+                    // res.end();
+                    messageData = {
+                        "message":"success",
+                        "data": data
+                    }
                 })
                 .catch(err => {
                     // if error
-                    res.status(500).send({
-                    message:
-                        err.message || "Error someting"
-                    });
+                    // res.status(500).send({
+                    // message:
+                    //     err.message || "Error someting"
+                    // });
+                    messageData = {
+                        "message":"error",
+                        "data":err
+                    }
                 });   
+
+                if(messageData.message === 'success'){
+                    // get data request
+                    const getRequest = await Requests.findOne({ where:{id:requestId}} )
+                    .then(result => {
+                        return result
+                    })
+                    // get data user to
+                    const userTo = await Users.findOne({ where:{id:getRequest.userId}} )
+                    .then(result => {
+                        return result;
+                    })
+                    // get data user from
+                    const userFrom = await Users.findOne({ where:{level:1} })
+                    .then(result => {
+                        return result;
+                    })
+                    const notifId = uuidv4();
+                    const notifData = {
+                        "text":getRequest.title
+                    }
+
+                    const createNotif = await Notifications.create({
+                        id:notifId,
+                        tableName:'requests',
+                        from:userFrom.name,
+                        to:userTo.id,
+                        idData:getRequest.id,
+                        data:JSON.stringify(notifData),
+                        stage:stageNew.text,
+                        status:0
+                    })
+                    .then(result => {
+                        return result;
+                    })         
+                    // if data inserted
+                    res.json({
+                        "message":"Success",
+                        "data":notifId
+                    });
+                    res.end();
+                }else if(messageData.message === 'error'){
+                    //if error
+                    res.status(500).send({
+                        message:messageData.message  || "Error someting"
+                    });
+                }
             }
         })      
        
@@ -337,12 +405,31 @@ exports.viewRequest = (req, res) => {
 }
 
 /**
+ * membuat nomor ticket request
+ * @param {code}
+ * @return {ticket}
+ */
+ const genNumberTicket = (code) => {
+    // create ticket number
+    const phrase = 'I';
+    var jumlahDigit = 7;
+    var codeString = `${code}`;
+    var jumlahRequest = codeString.length;
+    var selisih = jumlahDigit - jumlahRequest;
+    var zeroCount = '0000000';
+    var jumlahNol = zeroCount.substr(1, selisih);
+    var ticket = phrase+jumlahNol+code;
+    return ticket;
+}
+
+
+/**
  * permintaan disetujui dan waktu pengerjaannya sudah ditentukan
  * @param {*} req
  * @param {*} res
  * @returns
  */
-exports.openRequest = (req, res) => {
+exports.openRequest = async (req, res) => {
     try {
         // initiate variable
         const requestId = req.params.id;
@@ -350,15 +437,28 @@ exports.openRequest = (req, res) => {
         const startTime = req.body.start_time;
         const endDate = req.body.end_date;
         const endTime = req.body.end_time;
-        const stageId = req.body.stage_id;
+
+        // get data request
+        const requestData = await Request.findOne({ where: {id:requestId}} )
+        .then(result => {
+            return result;
+        })
+        // get stage open
+        const stageOpen = await Stages.findOne({ where:{text:'Open'}} )
+        .then(result => {
+            return result;
+        })
+        const stageId = stageOpen.id;
+        const ticket = genNumberTicket(requestData.code);
 
         // update data
-        Requests.update({
+       const update = await Requests.update({
            start_date:startDate,
            start_time:startTime,
            end_date:endDate,
            end_time:endTime,
-           stageId:stageId
+           stageId:stageId,
+           ticket:ticket
         }, {
             where: {
                 id:requestId
@@ -366,17 +466,21 @@ exports.openRequest = (req, res) => {
         })
         .then(data => {
             res.status(200).json({
-                "message":"Request open, permintaan pemnbuatan aplikasi telah di setejui"
+                "status":"success",
+                "ticket":ticket,
+                "message":"Request open, permintaan pembuatan aplikasi telah di setejui"
             });
             res.end();
         })
         .catch(err => {
             res.status(500).json({
-                message: `Error occured: ${err}`,
+                "status":"error",
+                "message": `Error occured: ${err}`,
             });
         });
     } catch(err) {
         res.status(500).json({
+            status:"error",
             message: `Error occured: ${err}`,
         });
     }
@@ -461,3 +565,115 @@ exports.closeRequest = (req, res) => {
         });
     }
 }
+
+/**
+ * delete attachment
+ * @param {*} req 
+ * @param {*} res 
+ */
+ exports.deleteAttachment = async (req, res) => {
+    try {
+        const attachmentId = req.params.id;
+        const attachment = await RequestAttachments.findByPk(attachmentId)
+        .then(data => {
+            return data;
+        })
+        .catch((err) => {
+            res.status(500).json({
+                message: `Error occured: ${err}`
+            }); 
+        });
+        if(attachment === undefined){
+            res.status(400).json({
+                message: `Data not found!`
+            });
+        }else{
+            const filename = attachment.file_name;
+            const filelocation = attachment.file_location;
+            const fileDelete = filelocation+'/'+filename;
+            // delete file
+            fs.unlink(fileDelete, (error) => {
+                if(error){
+                    return
+                }
+            });
+            // delete file data
+            RequestAttachments.destroy({
+                where: {
+                    id:attachmentId
+                }
+            })
+            .then(data => {
+                res.status(200).json({
+                    "message":"Deleted"
+                })
+            })
+            .catch(err => {
+                res.status(500).json({
+                    message: `Error occured: ${err}`
+                });
+            })
+        }
+    } catch(err) {
+        res.status(500).json({
+            message: `Error  occured: ${err}`
+        });
+    }
+}
+
+/**
+ * upload attachment
+ * @param {*} req
+ * @param {*} res
+ */
+ exports.inputAttachment = (req, res) => {
+    try {
+        upload(req, res, async (err) => {            
+            if(err instanceof multer.MulterError) {
+                res.json({message:err})
+            }else{
+                // parameter id
+                const requestId = req.body.id;
+                // upload files
+                let files = req.files;
+                let createdAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+                let fileUploads = [];
+                files.forEach(element => {
+                    fileUploads.push({
+                        filename: element.filename,
+                        filelocation:element.destination,
+                        alias:element.originalname,
+                        createdAt:createdAt,
+                        updatedAt:updatedAt
+                    });
+                });
+                // update file attachment
+                RequestAttachments.create({
+                    file_name:fileUploads[0].filename,
+                    file_location:fileUploads[0].filelocation,
+                    alias:fileUploads[0].alias,
+                    requestId:requestId
+                })
+                .then(data => {
+                    res.status(200).json({
+                        "status":"success",
+                        "message":"Updated"
+                    });
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        "status":"error",
+                        "message":`Error occured: ${err}`
+                    });
+                })
+            }
+        })
+    } catch(err) {
+        res.status(500).json({
+            "status":"error",
+            "message": `Error occured: ${err}`
+        });
+    }
+}
+

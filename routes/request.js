@@ -41,5 +41,13 @@ router.patch('/:id/update',
     auth.isAuth,
     requestControllers.updateRequest
 );
+router.delete('/:id/delete',
+    auth.isAuth,
+    requestControllers.deleteAttachment
+)
+router.post('/attachment',
+    auth.isAuth,
+    requestControllers.inputAttachment
+)
 
 module.exports = router;

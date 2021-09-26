@@ -18,7 +18,6 @@ exports.incidentNotifications = async (req, res) => {
         }
         const notifications = await Notifications.findAll({ 
             where:{
-                tableName:'incidents',
                 status:0,
                 to:idLogin
             }

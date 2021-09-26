@@ -19,6 +19,15 @@ const Request = sequelize.define('requests', {
         type: DataTypes.TEXT,
         allowNull: false
     },
+    code: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        unique: 'compositeIndex'
+    },
+    ticket: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     userId: {
         type: DataTypes.INTEGER(11),
         allowNull: false

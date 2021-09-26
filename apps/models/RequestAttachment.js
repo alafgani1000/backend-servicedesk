@@ -12,6 +12,10 @@ const RequestAttachment = sequelize.define('request_attachments', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    alias:{
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     file_location: {
         type: DataTypes.STRING,
         allowNull: false
