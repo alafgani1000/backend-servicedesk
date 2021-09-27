@@ -202,7 +202,7 @@ io.on('connection', (socket) => {
       })
     })
 
-    socket.on('newRequest', async data =>{
+    socket.on('openRequest', async data =>{
       // get data notification
       const notif = await Notifications.findOne({ where:{id:data} })
       .then(result => {

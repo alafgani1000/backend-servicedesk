@@ -429,7 +429,7 @@ exports.openRequest = async (req, res) => {
         const startTime = req.body.start_time;
         const endDate = req.body.end_date;
         const endTime = req.body.end_time;
-        const messageData = {
+        let messageData = {
 
         }
         // get data request
@@ -500,7 +500,7 @@ exports.openRequest = async (req, res) => {
                 to:userTo.id,
                 idData:getRequest.id,
                 data:JSON.stringify(notifData),
-                stage:stageNew.text,
+                stage:stageOpen.text,
                 status:0
             })
             .then(result => {
@@ -510,6 +510,7 @@ exports.openRequest = async (req, res) => {
             res.status(200).json({
                 "status":"success",
                 "ticket":ticket,
+                "data":getRequest,
                 "message":"Request open, permintaan pembuatan aplikasi telah di setejui",
                 "notifId":notifId
             });

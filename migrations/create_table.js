@@ -24,7 +24,7 @@ const IncidentAction = require('../apps/models/IncidentAction');
 // Category.sync();
 // Menu.sync();
 // MenuRole.sync();
-// Request.sync();
+Request.sync();
 RequestAttachment.sync();
 // Role.sync();
 // Stage.sync();
