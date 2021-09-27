@@ -201,6 +201,32 @@ io.on('connection', (socket) => {
         "notifications":notificationsData
       })
     })
+
+    socket.on('newRequest', async data =>{
+      // get data notification
+      const notif = await Notifications.findOne({ where:{id:data} })
+      .then(result => {
+        return result;
+      })
+      // get data user
+      const user =  await Users.findOne({ where: {id:notif.to} })
+      .then(result => {
+        return result;
+      })
+      // get data notifications
+      const notificationsData = await Notifications.findAll({
+        where: {
+          to:notif.to,
+          status:0
+        }
+      }).then(result => {
+        return result;
+      })
+      // emit notification
+      io.emit(user.token, {
+        "notifications":notificationsData
+      })
+   })
     
     socket.on('disconnect', () => {
       console.log('client disconnected');

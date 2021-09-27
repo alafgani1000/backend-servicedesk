@@ -320,8 +320,6 @@ exports.viewRequest = (req, res) => {
                 })
                 .then(data => {
                     // if data inserted
-                    // res.json({"message":"Success"});
-                    // res.end();
                     messageData = {
                         "message":"success",
                         "data": data
@@ -329,10 +327,6 @@ exports.viewRequest = (req, res) => {
                 })
                 .catch(err => {
                     // if error
-                    // res.status(500).send({
-                    // message:
-                    //     err.message || "Error someting"
-                    // });
                     messageData = {
                         "message":"error",
                         "data":err
@@ -346,12 +340,12 @@ exports.viewRequest = (req, res) => {
                         return result
                     })
                     // get data user to
-                    const userTo = await Users.findOne({ where:{id:getRequest.userId}} )
+                    const userFrom = await Users.findOne({ where:{id:getRequest.userId}} )
                     .then(result => {
                         return result;
                     })
                     // get data user from
-                    const userFrom = await Users.findOne({ where:{level:1} })
+                    const userTo = await Users.findOne({ where:{level:1} })
                     .then(result => {
                         return result;
                     })
@@ -435,7 +429,9 @@ exports.openRequest = async (req, res) => {
         const startTime = req.body.start_time;
         const endDate = req.body.end_date;
         const endTime = req.body.end_time;
-        console.log(startDate)
+        const messageData = {
+
+        }
         // get data request
         const requestData = await Requests.findOne({ where: {id:requestId}} )
         .then(result => {
@@ -463,19 +459,68 @@ exports.openRequest = async (req, res) => {
             }
         })
         .then(data => {
+            messageData = {
+                "status":"success",
+                "ticket":ticket,
+                "message":"Request open, permintaan pembuatan aplikasi telah disetujui"
+            }
+        })
+        .catch(err => {
+            messageData = {
+                "status":"error",
+                "message":`Error occured: ${err}`
+            }
+        });
+
+        if(messageData.status === "success"){
+            // get data request
+            const getRequest = await Requests.findOne({ where:{id:requestId}} )
+            .then(result => {
+                return result
+            })
+            // get data user to
+            const userTo = await Users.findOne({ where:{id:getRequest.userId}} )
+            .then(result => {
+                return result;
+            })
+            // get data user from
+            const userFrom = await Users.findOne({ where:{id:idLogin} })
+            .then(result => {
+                return result;
+            })
+            const notifId = uuidv4();
+            const notifData = {
+                "text":getRequest.title
+            }
+            
+            const createNotif = await Notifications.create({
+                id:notifId,
+                tableName:'requests',
+                from:userFrom.name,
+                to:userTo.id,
+                idData:getRequest.id,
+                data:JSON.stringify(notifData),
+                stage:stageNew.text,
+                status:0
+            })
+            .then(result => {
+                return result;
+            })         
+
             res.status(200).json({
                 "status":"success",
                 "ticket":ticket,
-                "message":"Request open, permintaan pembuatan aplikasi telah di setejui"
+                "message":"Request open, permintaan pembuatan aplikasi telah di setejui",
+                "notifId":notifId
             });
             res.end();
-        })
-        .catch(err => {
+        }else if(messageData.status === "error"){
             res.status(500).json({
                 "status":"error",
                 "message": `Error occured: ${err}`,
             });
-        });
+            res.end();
+        }
     } catch(err) {
         res.status(500).json({
             status:"error",
