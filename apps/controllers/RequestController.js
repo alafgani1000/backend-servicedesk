@@ -13,8 +13,6 @@ const Notifications = dbconfig.notifications;
 const Users = dbconfig.users;
 
 const storage = require('../middlewares/upload');
-const User = require('../models/User');
-
 const upload = multer({ 
     fileFilter: function (req, file, cb) {   
         let mimetype = file.mimetype;
@@ -437,9 +435,9 @@ exports.openRequest = async (req, res) => {
         const startTime = req.body.start_time;
         const endDate = req.body.end_date;
         const endTime = req.body.end_time;
-
+        console.log(startDate)
         // get data request
-        const requestData = await Request.findOne({ where: {id:requestId}} )
+        const requestData = await Requests.findOne({ where: {id:requestId}} )
         .then(result => {
             return result;
         })
