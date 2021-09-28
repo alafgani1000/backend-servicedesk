@@ -86,3 +86,26 @@ exports.signIn = async (req, res) => {
         });
     }
 }
+
+exports.checkSign = async (req, res) => {
+    try {
+        const user = await Users.findOne({ where:{id:idLogin} })
+        .then(result => {
+            return result;
+        })
+        if (user !== null) {
+            res.status(200).json({
+                'status':'ok'
+            })
+        } else {
+            res.status(500).json({
+                'status':'error'
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            'status':'error'
+        })
+    }
+    
+}

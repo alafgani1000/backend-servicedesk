@@ -535,17 +535,26 @@ exports.openRequest = async (req, res) => {
  * @param {*} req
  * @param {*} res
  */
-exports.resolveRequest = (req, res) => {
+exports.resolveRequest = async (req, res) => {
     try {
         // initiate variable
+        let dateNow = moment();
+        const sdate = dateNow.format('YYYY-MM-DD');
+        const stime = dateNow.format('HH:mm:ss');
         const requestId = req.params.id;
-        const stageId = req.body.stage_id;
-        const resolveDate = req.body.resolve_date;
-        const resolveTime = req.body.resolve_time;
+        const resolveDate = sdate;
+        const resolveTime = stime;
+        let messageData = {}
+
+        // resolve stage
+        const stageResolve = await Stages.findOne({ where:{text:'Resolve'} })
+        .then(result => {
+            return result;
+        })
     
         // update data
-        Requests.update({
-           stageId:stageId,
+        const resolve = await Requests.update({
+           stageId:stageResolve.id,
            resolve_date:resolveDate,
            resolve_time:resolveTime,
         }, {
@@ -554,19 +563,72 @@ exports.resolveRequest = (req, res) => {
             }
         })
         .then(data => {
-            res.status(200).json({
-                "message":"Request Resolved"
-            });
-            res.end();
+            messageData = {
+                "status":"success"
+            }
         })
         .catch(err => {
-            res.status(500).json({
-                message: `Error occured: ${err}`,
-            });
+            messageData = {
+                "status":"error",
+                "data":err
+            }
         });
+
+        if (messageData.status === "success") {
+            const getRequest = await Requests.findOne({ where:{id:requestId}} )
+            .then(result => {
+                return result
+            })
+
+            // get data user to
+            const userTo = await Users.findOne({ where:{id:getRequest.userId}} )
+            .then(result => {
+                return result;
+            })
+
+            // get data user from
+            const userFrom = await Users.findOne({ where:{id:idLogin} })
+            .then(result => {
+                return result;
+            })
+
+            const notifId = uuidv4();
+            const notifData = {
+                "text":getRequest.title
+            }
+
+            // create notifikasi
+            const createNotif = await Notifications.create({
+                id:notifId,
+                tableName:'requests',
+                from:userFrom.name,
+                to:userTo.id,
+                idData:getRequest.id,
+                data:JSON.stringify(notifData),
+                stage:stageResolve.text,
+                status:0
+            })
+            .then(result => {
+                return result;
+            })     
+
+            // response success
+            res.status(200).json({
+                "status":"success",
+                "message":"Resolved",
+                "notifId":notifId
+            })
+        } else if (messageData.status === "error") {
+            // response fail
+            res.status(500).json({
+                "status":"error",
+                "message":"Resolve Failed",
+            })
+        }
     } catch(err) {
         res.status(500).json({
-            message: `Error occured: ${err}`,
+            "status":"error",
+            "message": `Error occured: ${err}`,
         });
     }
 }
@@ -576,15 +638,25 @@ exports.resolveRequest = (req, res) => {
  * @param {*} req
  * @param {*} res
  */
-exports.closeRequest = (req, res) => {
+exports.closeRequest = async (req, res) => {
     try{
         const requestId = req.params.id;
-        const stageId = req.body.stage_id;
-        const closeDate = req.body.close_date;
-        const closeTime = req.body.close_time;
+        let dateNow = moment();
+        const cdate = dateNow.format('YYYY-MM-DD');
+        const ctime = dateNow.format('HH:mm:ss');
+        const closeDate = cdate;
+        const closeTime = ctime;
+        let messageData = {}
 
-        Requests.update({
-            stageId:stageId,
+        // stage close
+        const stageClose = await Stages.findOne({ where:{text:'Close'} })
+        .then(result => {
+            return result;
+        })
+
+        // update
+        const close = await Requests.update({
+            stageId:stageClose.id,
             close_date:closeDate,
             close_time:closeTime
         }, {
@@ -592,17 +664,68 @@ exports.closeRequest = (req, res) => {
                 id:requestId
            } 
         })
-        .then(err => {
-            res.status(200).json({
-                message:`Request Closed`
-            });
-            res.end();
+        .then(data => {
+            messageData = {
+                "status":"success",
+                "message":"Request Closed"
+            }
         })
         .catch(err => {
-            res.status(500).json({
-                message: `Error occured: ${err}`,
-            });
+            messageData = {
+                "status":"error",
+                "message":err
+            }
         })
+        if (messageData.status === "success") {
+            const getRequest = await Requests.findOne({ where:{id:requestId}} )
+            .then(result => {
+                return result
+            })
+
+            // get data user to
+            const userTo = await Users.findOne({ where:{id:getRequest.userId}} )
+            .then(result => {
+                return result;
+            })
+
+            // get data user from
+            const userFrom = await Users.findOne({ where:{id:idLogin} })
+            .then(result => {
+                return result;
+            })
+
+            const notifId = uuidv4();
+            const notifData = {
+                "text":getRequest.title
+            }
+
+            // create notifikasi
+            const createNotif = await Notifications.create({
+                id:notifId,
+                tableName:'requests',
+                from:userFrom.name,
+                to:userTo.id,
+                idData:getRequest.id,
+                data:JSON.stringify(notifData),
+                stage:stageClose.text,
+                status:0
+            })
+            .then(result => {
+                return result;
+            })     
+
+            res.status(200).json({
+                "status":messageData.status,
+                "message":messageData.message,
+                "notifId":notifId
+            });
+            res.end();
+        } else if (messageData.status === "error") {
+            res.status(500).json({
+                "status":messageData.status,
+                "message": `Error occured: ${messageData.message}`,
+            });
+        }
     }catch(err){
         res.status(500).json({
             message: `Error occured: ${err}`,

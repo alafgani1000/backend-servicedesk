@@ -202,14 +202,14 @@ io.on('connection', (socket) => {
       })
     })
 
-    socket.on('openRequest', async data =>{
+    socket.on('openRequest', async data => {
       // get data notification
       const notif = await Notifications.findOne({ where:{id:data} })
       .then(result => {
         return result;
       })
       // get data user
-      const user =  await Users.findOne({ where: {id:notif.to} })
+      const user =  await Users.findOne({ where:{id:notif.to} })
       .then(result => {
         return result;
       })
@@ -226,7 +226,53 @@ io.on('connection', (socket) => {
       io.emit(user.token, {
         "notifications":notificationsData
       })
-   })
+    })
+
+    socket.on('resolveRequest', async data => {
+      // get data notification
+      const notif = await Notifications.findOne({ where:{id:data} })
+      .then(result => {
+        return result;
+      })
+      // get data user
+      const user = await Users.findOne({ where:{id:notif.to} })
+      .then(result => {
+        return result;
+      })
+      // get data notifications 
+      const notificationsData = await Notifications.findAll({
+        where:{
+          to:notif.to,
+          status:0
+        }
+      })
+      io.emit(user.token, {
+        "notifications":notificationsData
+      })
+    })
+
+    socket.on('closeRequest', async data => {
+      // get data notification
+      const notif = await Notifications.findOne({ where:{id:data} })
+      .then(result => {
+        return result;
+      })
+      // get data user
+      const user = await Users.findOne({ where:{id:notif.to} })
+      .then(result => {
+        return result
+      })
+      // get data notifications
+      const notificationsData = await Notifications.findAll({
+        where:{
+          to:notif.to,
+          status:0
+        }
+      })
+      io.emit(user.token, {
+        "notifications":notificationsData
+      })
+    })
     
     socket.on('disconnect', () => {
       console.log('client disconnected');
