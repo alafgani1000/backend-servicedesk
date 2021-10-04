@@ -11,6 +11,7 @@ const Teams = dbconfig.teams;
 const Categories = dbconfig.categories;
 const Notifications = dbconfig.notifications;
 const Users = dbconfig.users;
+const RequestDevelopers = dbconfig.requestDevelopers;
 
 const storage = require('../middlewares/upload');
 const upload = multer({ 
@@ -63,6 +64,17 @@ require('dotenv').config();
                     model: Users,
                     as: "userRequests",
                     attributes: ["name"]
+                },
+                {
+                    model: RequestDevelopers,
+                    as: "requestDevelopers",
+                    include: [
+                        {
+                            model: Users,
+                            as: 'userDev',
+                            attributes: ["id","username","name"]
+                        }
+                    ]
                 }
             ],
             where: condition 
@@ -104,6 +116,18 @@ exports.viewRequest = (req, res) => {
                     model: Users,
                     as: "userRequests",
                     attributes: ["name"]
+                },
+                {
+                    model: RequestDevelopers,
+                    as: "requestDevelopers",
+                    include: [
+                        {
+                            model: Users,
+                            as: "userDev",
+                            attributes: ["id","username","name"]
+                        }
+
+                    ]
                 }
             ] 
         })

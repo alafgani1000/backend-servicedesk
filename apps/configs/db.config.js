@@ -96,10 +96,10 @@ db.requestDevelopers.belongsTo(db.requests, {
   foreignKey: "requestId",
   as: "developersRequest"
 });
-db.requestDevelopers.hasOne(db.users, { 
-  as:"reqUser",
+db.users.hasOne(db.requestDevelopers);
+db.requestDevelopers.belongsTo(db.users, {
+  as:"userDev",
   foreignKey:"userId"
-});
-db.users.belongsTo(db.requestDevelopers);
+})
 
 module.exports = db;
