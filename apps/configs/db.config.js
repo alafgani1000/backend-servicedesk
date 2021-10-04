@@ -24,6 +24,7 @@ db.roles = require('../models/Role');
 db.notifications = require('../models/Notification');
 db.actions = require('../models/Action');
 db.incidentActions = require('../models/IncidentAction');
+db.requestDevelopers = require('../models/RequestDevelopers');
 
 // user role
 db.roles.hasMany(db.users, {as:"rolesUsers", foreignKey:"level"});
@@ -36,7 +37,7 @@ db.teams.hasMany(db.users, {as:"teamUsers", foreignKey:"groupuser"});
 db.users.belongsTo(db.teams, {
   foreignKey: "groupuser",
   as:"userTeam"
-})
+});
 // incident attachment
 db.incidents.hasMany(db.incidentAttachments, { as:"incidentAttachments" });
 db.incidentAttachments.belongsTo(db.incidents, {
@@ -54,7 +55,7 @@ db.users.hasMany(db.incidents, { as:"incidentUsers" });
 db.incidents.belongsTo(db.users, {
   foreignKey: "userId",
   as: "userIncidents"
-})
+});
 // team incident
 db.teams.hasMany(db.incidents, { as:"incidentTeams" });
 db.incidents.belongsTo(db.teams, {
@@ -65,13 +66,13 @@ db.incidents.belongsTo(db.teams, {
 db.incidents.belongsTo(db.users, {
   foreignKey: "user_technician",
   as: "technicianIncident"
-})
+});
 // kategori incident
 db.categories.hasMany(db.incidents, { as:"incidentCategories" });
 db.incidents.belongsTo(db.categories, {
   foreignKey: "categoryId",
   as: "categoryIncidents"
-})
+});
 // request attachments
 db.requests.hasMany(db.requestAttachments, { as:"requestAttachments" });
 db.requestAttachments.belongsTo(db.requests, {
@@ -89,7 +90,16 @@ db.users.hasMany(db.requests, { as:"requestUsers" });
 db.requests.belongsTo(db.users, {
   foreignKey: "userId",
   as: "userRequests"
-})
-
+});
+db.requests.hasMany(db.requestDevelopers, { as:"requestDevelopers" });
+db.requestDevelopers.belongsTo(db.requests, {
+  foreignKey: "requestId",
+  as: "developersRequest"
+});
+db.requestDevelopers.hasOne(db.users, { 
+  as:"reqUser",
+  foreignKey:"userId"
+});
+db.users.belongsTo(db.requestDevelopers);
 
 module.exports = db;

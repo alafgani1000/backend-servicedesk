@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../configs/connection');
 
-const RequestUsers = sequelize.define('request_users', {
+const RequestDevelopers = sequelize.define('request_developers', {
     id: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -25,4 +25,4 @@ const RequestUsers = sequelize.define('request_users', {
     }
 });
 
-module.exports = RequestUsers;
+module.exports = RequestDevelopers;
