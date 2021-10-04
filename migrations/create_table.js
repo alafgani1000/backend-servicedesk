@@ -13,6 +13,7 @@ const User = require('../apps/models/User');
 const Action = require('../apps/models/Action');
 const Notification = require('../apps/models/Notification');
 const IncidentAction = require('../apps/models/IncidentAction');
+const RequestUsers = require('../apps/models/RequestUsers');
 
 // sequelize.sync();
 
@@ -24,8 +25,9 @@ const IncidentAction = require('../apps/models/IncidentAction');
 // Category.sync();
 // Menu.sync();
 // MenuRole.sync();
-Request.sync();
-RequestAttachment.sync();
+// Request.sync();
+// RequestAttachment.sync();
+RequestUsers.sync();
 // Role.sync();
 // Stage.sync();
 // User.sync();
