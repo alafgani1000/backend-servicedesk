@@ -49,5 +49,9 @@ router.post('/attachment',
     auth.isAuth,
     requestControllers.inputAttachment
 )
+router.delete('/:id/deleteDev',
+    auth.isAuth,
+    requestControllers.deleteDeveloper
+)
 
 module.exports = router;

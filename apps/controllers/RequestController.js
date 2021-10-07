@@ -132,11 +132,14 @@ exports.viewRequest = (req, res) => {
             ] 
         })
         .then(data => {
-            res.status(200).send(data);
+            res.status(200).json({
+                "message":"Success",
+                "data":data
+            });
         })
         .catch(err => {
-            res.status(500).send({
-            message:
+            res.status(500).json({
+            "message":
                 err.message || "Error someting"
             });
         });
@@ -773,7 +776,7 @@ exports.closeRequest = async (req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
- exports.deleteAttachment = async (req, res) => {
+exports.deleteAttachment = async (req, res) => {
     try {
         const attachmentId = req.params.id;
         const attachment = await RequestAttachments.findByPk(attachmentId)
@@ -828,7 +831,7 @@ exports.closeRequest = async (req, res) => {
  * @param {*} req
  * @param {*} res
  */
- exports.inputAttachment = (req, res) => {
+exports.inputAttachment = (req, res) => {
     try {
         upload(req, res, async (err) => {            
             if(err instanceof multer.MulterError) {
@@ -876,6 +879,50 @@ exports.closeRequest = async (req, res) => {
             "status":"error",
             "message": `Error occured: ${err}`
         });
+    }
+}
+
+exports.deleteDeveloper = async (req, res) => {
+    try {
+        const devId = req.params.id;
+        let messageData = {
+            message:"",
+            data:""
+        }
+        const deleteDev = await RequestDevelopers.destroy({
+            where: {
+                id:devId
+            }
+        })
+        .then(result => {
+            messageData = {
+                status:"success",
+                data:result
+            }
+        })
+        .catch(error => {
+            messageData = {
+                status:"error",
+                data:error
+            }
+        })
+        // check response
+        if (messageData.status === "success") {
+            res.status(200).json({
+                message:"success"
+            });
+            res.end();
+        } else if (messageData.status === "error") {
+            res.status(500).json({
+                message:"error"
+            })
+            res.end();
+        }
+    } catch (error) {
+        res.status(500).json({
+            message:`Error ${error}`
+        });
+        res.end();
     }
 }
 
