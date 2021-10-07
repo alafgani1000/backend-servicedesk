@@ -45,7 +45,7 @@ require('dotenv').config();
  * @param {*} req 
  * @param {*} res 
  */
- exports.viewRequests = (req, res) => {
+exports.viewRequests = (req, res) => {
     const title = req.query.title;
     var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
 
@@ -155,7 +155,7 @@ exports.viewRequest = (req, res) => {
  * @param {*} res
  *  
  */
- exports.updateRequest = async (req, res) => {
+exports.updateRequest = async (req, res) => {
     // inisiasi variabel
     const requestId = req.params.id;
     const title = req.body.title;
@@ -204,7 +204,7 @@ exports.viewRequest = (req, res) => {
  * @param {*} res 
  * @returns 
  */
- exports.updateAttachment = (req, res) => {
+exports.updateAttachment = (req, res) => {
     try {
         upload(req, res, async (err) => {            
             if(err instanceof multer.MulterError) {
@@ -453,6 +453,7 @@ exports.openRequest = async (req, res) => {
         const startTime = req.body.start_time;
         const endDate = req.body.end_date;
         const endTime = req.body.end_time;
+        const developers = req.body.developers;
         let messageData = {
 
         }
@@ -496,6 +497,16 @@ exports.openRequest = async (req, res) => {
             }
         });
 
+        // input developers
+        developers.forEach((item, index) => {
+            const devId = uuidv4()
+            const developers = RequestDevelopers.create({
+                id:devId,
+                requestId:requestId,
+                userId:item.value
+            })
+        });
+      
         if(messageData.status === "success"){
             // get data request
             const getRequest = await Requests.findOne({ where:{id:requestId}} )
