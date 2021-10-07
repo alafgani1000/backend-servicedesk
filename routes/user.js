@@ -29,4 +29,8 @@ router.delete('/:id/delete',
     auth.hashRole(AuthHelp.role('admin')),
     UserController.destroyUser);
 
+router.get('/data/developers',
+    auth.isAuth,
+    UserController.getDevelopers);
+
 module.exports = router;

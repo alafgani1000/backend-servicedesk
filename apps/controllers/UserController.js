@@ -63,20 +63,48 @@ exports.getUsers = (req, res) => {
         where: condition 
     })
     .then(data => {
-        res.json({
+        res.status(200).json({
             "message":"Success",
             "data":data
         });
+        res.end();
     })
     .catch(err => {
-        res.status(500).send({
-        message:
-            err.message || "Error someting"
+        res.status(500).json({
+            message:err.message || "Error someting"
         });
+        res.end();
     });
 
 }
 
+/**
+ * get data teknisi/developer
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.getDevelopers = (req, res) => {
+    Users.findAll({ where:{level:2} })
+    .then(data => {
+        res.status(200).json({
+            "message":"Success",
+            "data":data
+        });
+        res.end();
+    })
+    .catch(err => {
+        res.status(500).json({
+            "message":err
+        });
+        res.end();
+    })
+}
+
+/**
+ * store user
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.storeUser = (req, res) => {
     let userName = req.body.username;
     let name = req.body.name;
@@ -119,6 +147,12 @@ exports.storeUser = (req, res) => {
     
 }
 
+/**
+ * update user
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.updateUserForAdmin = (req, res) => {
     /*-- validation --*/
     const errors = validationResult(req);
@@ -162,6 +196,11 @@ exports.updateUserForAdmin = (req, res) => {
     }
 }
 
+/**
+ * delete user
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.destroyUser = (req, res) => {
     let userId = req.params.id;
     db.connect((err) => {
