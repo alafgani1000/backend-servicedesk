@@ -53,5 +53,9 @@ router.delete('/:id/deleteDev',
     auth.isAuth,
     requestControllers.deleteDeveloper
 )
+router.get('/:id/get/dev/users',
+    auth.isAuth,
+    requestControllers.getDevelopersUpdate
+)
 
 module.exports = router;

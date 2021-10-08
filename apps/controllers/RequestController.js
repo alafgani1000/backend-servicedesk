@@ -14,6 +14,7 @@ const Users = dbconfig.users;
 const RequestDevelopers = dbconfig.requestDevelopers;
 
 const storage = require('../middlewares/upload');
+const { Op } = require('sequelize');
 const upload = multer({ 
     fileFilter: function (req, file, cb) {   
         let mimetype = file.mimetype;
@@ -167,6 +168,7 @@ exports.updateRequest = async (req, res) => {
     const location = req.body.location;
     const phone = req.body.phone;
     const updatedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+    const developers = req.body.developers;
     try{
         // update request
         const updateRequest = await Requests.update({
@@ -193,6 +195,18 @@ exports.updateRequest = async (req, res) => {
                 "message":`Error occured: ${err}`
             })
         })
+
+        // input developers
+        if (developers.length) {
+            developers.forEach((item, index) => {
+                const devId = uuidv4()
+                const developers = RequestDevelopers.create({
+                    id:devId,
+                    requestId:requestId,
+                    userId:item.value
+                })
+            });
+        }
     } catch(err) {
         res.status(500).json({
             "status":"error",
@@ -501,16 +515,18 @@ exports.openRequest = async (req, res) => {
         });
 
         // input developers
-        developers.forEach((item, index) => {
-            const devId = uuidv4()
-            const developers = RequestDevelopers.create({
-                id:devId,
-                requestId:requestId,
-                userId:item.value
-            })
-        });
+        if (developers.length > 0) {
+            developers.forEach((item, index) => {
+                const devId = uuidv4()
+                const developers = RequestDevelopers.create({
+                    id:devId,
+                    requestId:requestId,
+                    userId:item.value
+                })
+            });
+        }
       
-        if(messageData.status === "success"){
+        if (messageData.status === "success") {
             // get data request
             const getRequest = await Requests.findOne({ where:{id:requestId}} )
             .then(result => {
@@ -553,14 +569,14 @@ exports.openRequest = async (req, res) => {
                 "notifId":notifId
             });
             res.end();
-        }else if(messageData.status === "error"){
+        } else if (messageData.status === "error") {
             res.status(500).json({
                 "status":"error",
                 "message": `Error occured: ${err}`,
             });
             res.end();
         }
-    } catch(err) {
+    } catch (err) {
         res.status(500).json({
             status:"error",
             message: `Error occured: ${err}`,
@@ -882,6 +898,11 @@ exports.inputAttachment = (req, res) => {
     }
 }
 
+/**
+ * delete developer request
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.deleteDeveloper = async (req, res) => {
     try {
         const devId = req.params.id;
@@ -926,3 +947,67 @@ exports.deleteDeveloper = async (req, res) => {
     }
 }
 
+/**
+ * get data developer update
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.getDevelopersUpdate = async (req, res) => {
+    try {
+        const requestId = req.params.id;
+        let messageData = {
+            status:"",
+            data:""
+        };
+        let devs = [];
+        // get data developer
+        const dataDevs = await RequestDevelopers.findAll({
+            where:{
+                requestId:requestId
+            }
+        }).then(result => {
+            return result;
+        })
+        dataDevs.forEach((item,index) => {
+            devs.push(item.userId)
+        })
+        // get data users
+        const data = await Users.findAll({
+            where:{
+                id:{
+                    [Op.notIn]:devs,
+                },
+                level:{
+                    [Op.in]:[2]
+                }
+            }
+        }).then(result => {
+            messageData = {
+                "status":"success",
+                "data":result
+            }
+        }).catch(error => {
+            messageData = {
+                "status":"error",
+                "data":error
+            }
+        })
+        if (messageData.status === "success") {
+            res.status(200).json({
+                "message":"Success",
+                "data":messageData.data
+            });
+            res.end();
+        } else if (messageData.status === "error") {
+            res.status(500).json({
+                "message":"Error",
+                "data":messageData.data
+            })
+            res.end();
+        }
+    } catch (error) {
+        res.status(500).json({
+            "message":"Error"
+        })
+    }
+}
