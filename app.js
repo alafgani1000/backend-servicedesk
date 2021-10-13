@@ -34,7 +34,7 @@ const Teams = dbconfig.teams;
 const Categories = dbconfig.categories;
 const Notifications = dbconfig.notifications;
 const Users = dbconfig.users;
-const { countIncidentEmit } = require('./apps/controllers/DashboardController');
+const { countIncidentEmit, countRequestEmit } = require('./apps/controllers/DashboardController');
 const { countNewIncident, dataServer } =  require('./apps/controllers/NotificationController');
 
 app.use(index);
@@ -51,16 +51,19 @@ app.use('/api/notifications',notifications);
 let interval;
 io.on('connection', (socket) => {
     console.log('new client connected');
-    // if(interval){
-    //     clearInterval(interval);
-    // }
-    // interval = setInterval(() => 
-    // countIncidentEmit(socket),
-    // 1000);
-    // interval = setInterval(() => 
-    // countNewIncident(socket),
-    // 1000);
-
+    if(interval){
+        clearInterval(interval);
+    }
+    interval = setInterval(() => 
+      countRequestEmit(socket),
+    1000);
+    interval = setInterval(() => 
+      countIncidentEmit(socket),
+    1000);
+    socket.on('disconnect', () => {
+      console.log('client disconnected');
+      clearInterval(interval)
+    });
     /**
      * notifikasi ada incident/problem baru
      * emit new newIncident frim client
@@ -274,10 +277,10 @@ io.on('connection', (socket) => {
       })
     })
     
-    socket.on('disconnect', () => {
-      console.log('client disconnected');
-      // clearInterval(interval)
-    });
+    // socket.on('disconnect', () => {
+    //   console.log('client disconnected');
+    //   // clearInterval(interval)
+    // });
 });
 
 
