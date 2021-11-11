@@ -25,6 +25,7 @@ db.notifications = require('../models/Notification');
 db.actions = require('../models/Action');
 db.incidentActions = require('../models/IncidentAction');
 db.requestDevelopers = require('../models/RequestDevelopers');
+db.loanGoods = require('../models/LoanGoods');
 
 // user role
 db.roles.hasMany(db.users, {as:"rolesUsers", foreignKey:"level"});

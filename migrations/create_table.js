@@ -14,6 +14,7 @@ const Action = require('../apps/models/Action');
 const Notification = require('../apps/models/Notification');
 const IncidentAction = require('../apps/models/IncidentAction');
 const RequestDevelopers = require('../apps/models/RequestDevelopers');
+const LoadGoods = require('../apps/models/LoanGoods');
 
 // sequelize.sync();
 
@@ -27,10 +28,11 @@ const RequestDevelopers = require('../apps/models/RequestDevelopers');
 // MenuRole.sync();
 // Request.sync();
 // RequestAttachment.sync();
-RequestDevelopers.sync();
+// RequestDevelopers.sync();
 // Role.sync();
 // Stage.sync();
 // User.sync();
 // DefaultRoleValue.role();
+LoadGoods.sync();
 
 
