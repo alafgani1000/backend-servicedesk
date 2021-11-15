@@ -5,8 +5,9 @@ const auth = require('../apps/middlewares/auth');
 const AuthHelp = require('../apps/helpers/AuthHelper');
 const { check } = require('express-validator');
 
-
-router.post('/create', 
+router.post('/pinjam', 
     auth.isAuth, 
     peminjamanController.pinjam
 );
+
+module.exports = router

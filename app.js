@@ -24,6 +24,7 @@ const stage = require('./routes/stage');
 const incident = require('./routes/incident')
 const request = require('./routes/request');
 const notifications = require('./routes/notification');
+const peminjaman = require('./routes/Peminjaman');
 
 // for socket io
 const dbconfig = require('./apps/configs/db.config');
@@ -47,6 +48,7 @@ app.use('/api/stage',stage);
 app.use('/api/incident',incident);
 app.use('/api/request',request);
 app.use('/api/notifications',notifications);
+app.use('/api/peminjaman',peminjaman);
 
 let interval;
 io.on('connection', (socket) => {
