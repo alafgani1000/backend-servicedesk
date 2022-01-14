@@ -65,19 +65,18 @@ exports.viewPeminjaman = (req, res) => {
  * @param {*} res 
  */
 exports.pinjam = async (req, res) => {
-    const nopegawai = req.body.nopegawai;
-    const kodeBarang = req.body.kode_barang;
-    const namaBarang = req.body.nama_barang;
-    const tanggalPinjam = moment().format('YYYY-MM-DD');
-    const jamPinjam = moment().format('HH:mm:ss');
-
+    let nopegawai = req.body.nopegawai;
+    let kodeBarang = req.body.kode_barang;
+    let namaBarang = req.body.nama_barang;
+    let tanggalPinjam = moment().format('YYYY-MM-DD');
+    let jamPinjam = moment().format('HH:mm:ss');
     try {
         const insert = await Peminjaman.create({
             nopegawai:nopegawai,
-            kode_barang:kodeBarang,
-            nama_barang:namaBarang,
-            tanggal_pinjam:tanggalPinjam,
-            jam_pinjam:jamPinjam
+            kodeBarang:kodeBarang,
+            namaBarang:namaBarang,
+            tanggalPinjam:tanggalPinjam,
+            waktuPinjam:jamPinjam
         }).then(data => {
             return res.status(200).json({
                 status: 'success',
@@ -110,8 +109,8 @@ exports.pengembalian =  async (req, res) => {
     const jamKembali = moment().format('HH:mm:ss');
     try {
         const update = await Peminjaman.update({
-            tanggal_kembali:tanggalKembali,
-            waktu_kembali:jamKembali
+            tanggalKembali:tanggalKembali,
+            waktukembali:jamKembali
         }, { 
             where:{
                 id:dataId
