@@ -366,7 +366,6 @@ exports.deleteIncident = (req, res) => {
  */
 exports.updateIncident = (req, res) => {
     // inisiasi variabel
-    console.log(req.body);
     const incidentId = req.params.id;
     let text = req.body.text;
     let location = req.body.location;

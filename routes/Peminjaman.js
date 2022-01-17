@@ -10,6 +10,14 @@ router.post('/pinjam',
     auth.isAuth, 
     peminjamanController.pinjam
 );
+router.put('/:id/update',
+    auth.isAuth,
+    peminjamanController.update
+);
+router.delete('/:id/delete',
+    auth.isAuth,
+    peminjamanController.delete
+)
 router.get('/:id/data',
     auth.isAuth,
     peminjamanController.viewPeminjaman    

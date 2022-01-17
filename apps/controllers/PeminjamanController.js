@@ -77,16 +77,10 @@ exports.pinjam = async (req, res) => {
             namaBarang:namaBarang,
             tanggalPinjam:tanggalPinjam,
             waktuPinjam:jamPinjam
-        }).then(data => {
-            return res.status(200).json({
-                status: 'success',
-                message: 'Peminjaman barang berhasil dilakukan'
-            })
-        }).catch(data => {
-            return res.json({
-                status: 'error',
-                message: 'Peminjaman gagal'.data
-            })
+        })
+        return res.status(200).json({
+            status: 'success',
+            message: 'Peminjaman barang berhasil dilakukan'
         })
     } catch(err) {
         return res.json({
@@ -95,6 +89,65 @@ exports.pinjam = async (req, res) => {
         });
     }
     
+}
+
+/**
+ * delete data peminjaman
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+exports.delete = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const deleteData = await Peminjaman.destroy({
+            where: {
+                id:id
+            }
+        });
+        return res.json({
+            status: 'success',
+            message: 'Delete data success'
+        });
+    } catch(err) {
+        return res.json({
+            status: 'error',
+            message: err
+        });
+    }
+}
+
+/**
+ * update peminjaman
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+exports.update =  async (req, res) => {
+    let id =  req.params.id;
+    const nopegawai = req.body.nopegawai;
+    const kodeBarang = req.body.kodeBarang;
+    const namaBarang = req.body.namaBarang; 
+    try {
+        const update  = await Peminjaman.update({
+            nopegawai: nopegawai,
+            kodeBarang: kodeBarang,
+            namaBarang: namaBarang
+        },{
+            where:{
+                id:id
+            }
+        });
+        return res.json({
+            status: 'success',
+            message: id+' Update success'
+        })
+    } catch(err) {
+        return res.json({
+            status: 'error',
+            message: err
+        })
+    }
 }
 
 /**
