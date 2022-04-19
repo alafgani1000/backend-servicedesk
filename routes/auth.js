@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const AuthController = require('../apps/controllers/AuthController');
-const auth = require('../apps/middlewares/auth');
+const AuthController = require("../apps/controllers/AuthController");
+const auth = require("../apps/middlewares/auth");
 
-router.post('/sign',AuthController.signIn);
-router.post('/checkSign', auth.isAuth, AuthController.checkSign);
+router.post("/sign", AuthController.signIn);
+router.post("/checkSign", AuthController.checkSign);
 
 module.exports = router;
