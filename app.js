@@ -36,14 +36,8 @@ const Teams = dbconfig.teams;
 const Categories = dbconfig.categories;
 const Notifications = dbconfig.notifications;
 const Users = dbconfig.users;
-const {
-  countIncidentEmit,
-  countRequestEmit,
-} = require("./apps/controllers/DashboardController");
-const {
-  countNewIncident,
-  dataServer,
-} = require("./apps/controllers/NotificationController");
+const { countIncidentEmit, countRequestEmit } = require("./apps/controllers/DashboardController");
+const { countNewIncident, dataServer } = require("./apps/controllers/NotificationController");
 
 app.use(index);
 app.use("/api/user", user);
@@ -63,10 +57,10 @@ io.on("connection", (socket) => {
   if (interval) {
     clearInterval(interval);
   }
-  interval = setInterval(async () => {
-    io.emit("countIncident", await countIncidentEmit());
-    io.emit("countRequest", await countRequestEmit());
-  }, 1000);
+  // interval = setInterval(async () => {
+  //   io.emit("countIncident", await countIncidentEmit());
+  //   io.emit("countRequest", await countRequestEmit());
+  // }, 1000);
   socket.on("disconnect", () => {
     console.log("client disconnected");
     clearInterval(interval);
@@ -103,17 +97,13 @@ io.on("connection", (socket) => {
 
   socket.on("inputTicket", async (data) => {
     // get data notification
-    const notif = await Notifications.findOne({ where: { id: data } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const notif = await Notifications.findOne({ where: { id: data } }).then((result) => {
+      return result;
+    });
     // get data user
-    const user = await Users.findOne({ where: { id: notif.to } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const user = await Users.findOne({ where: { id: notif.to } }).then((result) => {
+      return result;
+    });
     // get data notifications
     const notificationsData = await Notifications.findAll({
       where: {
@@ -132,17 +122,13 @@ io.on("connection", (socket) => {
   // handle notification resolve incident
   socket.on("resolveIncident", async (data) => {
     // get data notification
-    const notif = await Notifications.findOne({ where: { id: data } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const notif = await Notifications.findOne({ where: { id: data } }).then((result) => {
+      return result;
+    });
     // get data user
-    const user = await Users.findOne({ where: { id: notif.to } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const user = await Users.findOne({ where: { id: notif.to } }).then((result) => {
+      return result;
+    });
     // get data notifications
     const notificationsData = await Notifications.findAll({
       where: {
@@ -162,17 +148,13 @@ io.on("connection", (socket) => {
   socket.on("closeIncident", async (data) => {
     data.forEach(async (item, index) => {
       // get data
-      const notif = await Notifications.findOne({ where: { id: item } }).then(
-        (result) => {
-          return result;
-        }
-      );
+      const notif = await Notifications.findOne({ where: { id: item } }).then((result) => {
+        return result;
+      });
       // get data user
-      const user = await Users.findOne({ where: { id: notif.to } }).then(
-        (result) => {
-          return result;
-        }
-      );
+      const user = await Users.findOne({ where: { id: notif.to } }).then((result) => {
+        return result;
+      });
       // get notifications
       const notificationsData = await Notifications.findAll({
         where: {
@@ -191,17 +173,13 @@ io.on("connection", (socket) => {
 
   socket.on("newRequest", async (data) => {
     // get data notification
-    const notif = await Notifications.findOne({ where: { id: data } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const notif = await Notifications.findOne({ where: { id: data } }).then((result) => {
+      return result;
+    });
     // get data user
-    const user = await Users.findOne({ where: { id: notif.to } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const user = await Users.findOne({ where: { id: notif.to } }).then((result) => {
+      return result;
+    });
     // get data notifications
     const notificationsData = await Notifications.findAll({
       where: {
@@ -219,17 +197,13 @@ io.on("connection", (socket) => {
 
   socket.on("openRequest", async (data) => {
     // get data notification
-    const notif = await Notifications.findOne({ where: { id: data } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const notif = await Notifications.findOne({ where: { id: data } }).then((result) => {
+      return result;
+    });
     // get data user
-    const user = await Users.findOne({ where: { id: notif.to } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const user = await Users.findOne({ where: { id: notif.to } }).then((result) => {
+      return result;
+    });
     // get data notifications
     const notificationsData = await Notifications.findAll({
       where: {
@@ -247,17 +221,13 @@ io.on("connection", (socket) => {
 
   socket.on("resolveRequest", async (data) => {
     // get data notification
-    const notif = await Notifications.findOne({ where: { id: data } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const notif = await Notifications.findOne({ where: { id: data } }).then((result) => {
+      return result;
+    });
     // get data user
-    const user = await Users.findOne({ where: { id: notif.to } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const user = await Users.findOne({ where: { id: notif.to } }).then((result) => {
+      return result;
+    });
     // get data notifications
     const notificationsData = await Notifications.findAll({
       where: {
@@ -272,17 +242,13 @@ io.on("connection", (socket) => {
 
   socket.on("closeRequest", async (data) => {
     // get data notification
-    const notif = await Notifications.findOne({ where: { id: data } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const notif = await Notifications.findOne({ where: { id: data } }).then((result) => {
+      return result;
+    });
     // get data user
-    const user = await Users.findOne({ where: { id: notif.to } }).then(
-      (result) => {
-        return result;
-      }
-    );
+    const user = await Users.findOne({ where: { id: notif.to } }).then((result) => {
+      return result;
+    });
     // get data notifications
     const notificationsData = await Notifications.findAll({
       where: {
